@@ -8,6 +8,7 @@ public class Scanner {
     public Token getToken(String inputData ){
 
         Token token = null;
+        String s = null;
 
         while (Character.isWhitespace(inputData.charAt(i)) || inputData.charAt(i) == '{') {
             if (inputData.charAt(i) == '{') {
@@ -25,10 +26,52 @@ public class Scanner {
             token = new Token(Token.TokenType.EOS,"\0");
             return token;
         }
-        if (inputData.charAt(i) == ';') {
+        if ( Character.isDigit(inputData.charAt(i)) ) {
+            while(Character.isDigit(inputData.charAt(i))){
+                s += inputData.charAt(i++);
+            }
+            token = new Token(Token.TokenType.NUMBER,s);
+        }
+        else if (Character.isAlphabetic(inputData.charAt(i))) {
+            while(Character.isAlphabetic(inputData.charAt(i))){
+                s += inputData.charAt(i++);
+            }   //need to be edited later when reserved words are added
+            token = new Token(Token.TokenType.IDENTIFIER,s);
+        }
+        else if (inputData.charAt(i) == ':' && inputData.charAt(i+1) == '=') {
+            token = new Token(Token.TokenType.ASSIGN,":=");
+            i+=2;
+        }
+        else if (inputData.charAt(i) == '+') {
+            token = new Token(Token.TokenType.PLUS,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i) == '/') {
+            token = new Token(Token.TokenType.DIV,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i) == '-') {
+            token = new Token(Token.TokenType.MINUS,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i) == '*') {
+            token = new Token(Token.TokenType.MULT,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i) == '=') {
+            token = new Token(Token.TokenType.EQUAL,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i) == '(') {
+            token = new Token(Token.TokenType.OPENBRACKET,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i) == ')') {
+            token = new Token(Token.TokenType.CLOSEDBRACKET,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i) == ';') {
             token = new Token(Token.TokenType.SEMI_COLON,String.valueOf(inputData.charAt(i++)));
         }
-
+        else if (inputData.charAt(i) == '<') {
+            token = new Token(Token.TokenType.LESSTHAN,String.valueOf(inputData.charAt(i++)));
+        }
+        else{
+            token = new Token(Token.TokenType.ERROR,String.valueOf(inputData.charAt(i)));
+        }
         return token;
     }
 }
