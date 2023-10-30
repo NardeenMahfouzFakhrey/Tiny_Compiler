@@ -11,7 +11,7 @@ public class Scanner {
     public Token getToken(String inputData ){
 
         Token token = null;
-        String s = null;
+        String s = "";
 
         while (Character.isWhitespace(inputData.charAt(i)) || inputData.charAt(i) == '{') {
             if (inputData.charAt(i) == '{') {
@@ -47,8 +47,7 @@ public class Scanner {
                 }
             }
             if (isReserved) {
-                s = s.toUpperCase();
-                token = new Token(Token.TokenType.valueOf(s),s);
+                token = new Token(Token.TokenType.valueOf(s.toUpperCase()),s);
             } else {
                 token = new Token(Token.TokenType.IDENTIFIER, s);
             }
