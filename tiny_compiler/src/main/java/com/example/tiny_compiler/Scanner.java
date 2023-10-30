@@ -5,6 +5,9 @@ import java.util.ArrayList;
 public class Scanner {
 
     private static int i = 0;
+
+    String[] Reserved = {"IF", "THEN", "END", "REPEAT", "UNTIL", "READ", "WRITE"};
+
     public Token getToken(String inputData ){
 
         Token token = null;
@@ -35,8 +38,19 @@ public class Scanner {
         else if (Character.isAlphabetic(inputData.charAt(i))) {
             while(Character.isAlphabetic(inputData.charAt(i))){
                 s += inputData.charAt(i++);
-            }   //need to be edited later when reserved words are added
-            token = new Token(Token.TokenType.IDENTIFIER,s);
+            }
+            boolean isReserved = false;
+            for (String reservedWord : Reserved) {
+                if (s.equals(reservedWord)) {
+                    isReserved = true;
+                    break;
+                }
+            }
+            if (isReserved) {
+                token = new Token(Token.TokenType.valueOf(s),s);
+            } else {
+                token = new Token(Token.TokenType.IDENTIFIER, s);
+            }
         }
         else if (inputData.charAt(i) == ':' && inputData.charAt(i+1) == '=') {
             token = new Token(Token.TokenType.ASSIGN,":=");
