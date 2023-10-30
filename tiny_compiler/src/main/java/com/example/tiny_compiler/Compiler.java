@@ -9,6 +9,13 @@ public class Compiler {
     private ArrayList<Token> tokenStream = new ArrayList<>();
     private Scanner scanner = new Scanner();
     private String inputData;
+    public String getInputData() {
+        return inputData;
+    }
+
+    public void setInputData(String inputData) {
+        this.inputData = inputData;
+    }
 
     public void compile(String inputData){
         //call scanner with inputData to scan function to get all tokens one by one
@@ -44,7 +51,8 @@ public class Compiler {
     public String readInputData(String input){
         input = input.replaceAll("\n","");
         System.out.println(input);
-        return input;
+        setInputData(input);
+        return inputData;
     }
 
     public void startScanner(){
