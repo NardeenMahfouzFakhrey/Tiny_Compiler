@@ -6,7 +6,7 @@ public class Scanner {
 
     private static int i = 0;
 
-    String[] Reserved = {"IF", "THEN", "END", "REPEAT", "UNTIL", "READ", "WRITE"};
+    String[] Reserved = {"if", "then", "end", "repeat", "until", "read", "write"};
 
     public Token getToken(String inputData ){
 
@@ -47,6 +47,7 @@ public class Scanner {
                 }
             }
             if (isReserved) {
+                s = s.toUpperCase();
                 token = new Token(Token.TokenType.valueOf(s),s);
             } else {
                 token = new Token(Token.TokenType.IDENTIFIER, s);
