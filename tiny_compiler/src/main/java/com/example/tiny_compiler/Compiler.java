@@ -1,14 +1,15 @@
 package com.example.tiny_compiler;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+
+
 
 public class Compiler {
     private ArrayList<Token> tokenStream = new ArrayList<>();
     private Scanner scanner = new Scanner();
     private String inputData;
+
     public String getInputData() {
         return inputData;
     }
@@ -22,9 +23,29 @@ public class Compiler {
 
     }
 
+    public void setTokenStream(ArrayList<Token> tokenStream) {
+        this.tokenStream = tokenStream;
+    }
 
     public void savedToFile(){
-        //save the token stream to a file
+        try {
+        FileOutputStream fos = new FileOutputStream("OutputFiles\\output1.txt");
+        String tokenLine = "";
+        for(int i = 0; i < tokenStream.size(); i++){
+            Token token = tokenStream.get(i);
+            if(i == tokenStream.size()-1)
+                tokenLine = token.getValue() +", "+ token.getType();
+            else
+                tokenLine = token.getValue() + ", " + token.getType() +"\n";
+            fos.write(tokenLine.getBytes());
+        }
+        fos.flush();
+        fos.close();
+            ProcessBuilder pb = new ProcessBuilder("notepad.exe", "OutputFiles\\output.txt");
+            pb.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void readFile(String filePath){
@@ -65,7 +86,7 @@ public class Compiler {
                 readFile(filePath);
                 break;
             case "C":
-                System.out.println("Enter your Code Lines: \nEnter (Ctrl+D/Ctrl+Z to finish)");
+                System.out.println("Enter your Code Lines: \nEnter (Enter then Ctrl+D to finish)");
                 StringBuilder userInput = new StringBuilder();
                 while (scan.hasNextLine()) {
                     String line = scan.nextLine();
