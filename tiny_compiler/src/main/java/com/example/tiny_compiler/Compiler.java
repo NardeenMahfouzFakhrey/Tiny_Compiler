@@ -21,8 +21,6 @@ public class Compiler {
     }
 
     public void readFile(String filePath){
-        System.out.println("File path");
-        System.out.println(filePath);
         StringBuilder builder = new StringBuilder();
 
         try (BufferedReader buffer = new BufferedReader(
@@ -44,10 +42,7 @@ public class Compiler {
 
 
     public String readInputData(String input){
-        System.out.println("Written codes");
-        System.out.println(input);
         input = input.replaceAll("\n","");
-        input = input.replaceAll("\\p{Z}", "");
         System.out.println(input);
         return input;
     }
