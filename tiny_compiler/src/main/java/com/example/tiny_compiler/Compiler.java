@@ -9,7 +9,7 @@ public class Compiler {
 
     public void compile(String inputData){
         //call scanner with inputData to scan function to get all tokens one by one
-
+        int i=0;
     }
 
     public void savedToFile(){

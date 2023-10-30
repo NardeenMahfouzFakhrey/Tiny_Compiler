@@ -21,7 +21,9 @@ public class Token {
         DIV,
         OPENBRACKET,
         CLOSEDBRACKET,
-        NUMBER
+        NUMBER,
+        ERROR,
+        EOS
     };
     private TokenType type;
     private String value;
