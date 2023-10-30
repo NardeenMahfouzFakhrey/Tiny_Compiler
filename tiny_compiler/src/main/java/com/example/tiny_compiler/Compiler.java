@@ -48,11 +48,10 @@ public class Compiler {
     }
 
 
-    public String readInputData(String input){
+    public void readInputData(String input){
         input = input.replaceAll("\n","");
         System.out.println(input);
         setInputData(input);
-        return inputData;
     }
 
     public void startScanner(){
