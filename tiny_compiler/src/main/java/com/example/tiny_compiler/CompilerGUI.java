@@ -13,7 +13,6 @@ public class CompilerGUI extends Application {
     }
 
     public static void main(String[] args) {
-
         launch();
     }
 }
