@@ -49,8 +49,7 @@ public class Compiler {
 
 
     public void readInputData(String input){
-        input = input.replaceAll("\n","");
-        System.out.println(input);
+        input = input.replaceAll("\n"," ");
         setInputData(input);
     }
 
