@@ -15,6 +15,11 @@ public class CompilerGUI extends Application {
     }
 
     public static void main(String[] args) {
+
+        Compiler compiler = new Compiler();
+        compiler.startScanner();
+        System.out.println(compiler.getInputData());
+        compiler.compile(compiler.getInputData());
         launch();
     }
 }

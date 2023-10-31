@@ -3,6 +3,8 @@ package com.example.tiny_compiler;
 import java.io.*;
 import java.util.ArrayList;
 
+import static com.example.tiny_compiler.Token.TokenType.EOS;
+import static com.example.tiny_compiler.Token.TokenType.ERROR;
 
 
 public class Compiler {
@@ -20,7 +22,29 @@ public class Compiler {
 
     public void compile(String inputData){
         //call scanner with inputData to scan function to get all tokens one by one
+        scan();
+    }
 
+    public ArrayList<Token> scan(){
+
+        ArrayList<Token> tokens = new ArrayList<>();
+
+        while (true) {
+            Token token = scanner.getToken(inputData);
+            if (token.getType() == EOS ){
+                savedToFile();
+                break;
+            }
+            else if ( token.getType() == ERROR){
+                // TODO :ERROR HANDLER
+                break;
+            }
+            tokens.add(token);
+        }
+        for (Token token : tokens){
+            System.out.println("Type: "+token.getType()+", value: "+token.getValue());
+        }
+         return tokens;
     }
 
     public void setTokenStream(ArrayList<Token> tokenStream) {
@@ -71,6 +95,7 @@ public class Compiler {
 
     public void readInputData(String input){
         input = input.replaceAll("\n"," ");
+       // System.out.println(input);
         setInputData(input);
     }
 

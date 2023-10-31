@@ -13,6 +13,10 @@ public class Scanner {
         Token token = null;
         String s = "";
 
+        if (i >= inputData.length()-1){
+            token = new Token(Token.TokenType.EOS,"\0");
+            return token;
+        }
         while (Character.isWhitespace(inputData.charAt(i)) || inputData.charAt(i) == '{') {
             if (inputData.charAt(i) == '{') {
                 while (inputData.charAt(i) != '}') {
@@ -24,10 +28,6 @@ public class Scanner {
                 }
             }
             i++;
-        }
-        if (i >= inputData.length()){
-            token = new Token(Token.TokenType.EOS,"\0");
-            return token;
         }
         if ( Character.isDigit(inputData.charAt(i)) ) {
             while(Character.isDigit(inputData.charAt(i))){
