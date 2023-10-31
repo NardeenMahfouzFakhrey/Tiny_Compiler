@@ -14,12 +14,12 @@ public class CompilerGUI extends Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         Compiler compiler = new Compiler();
         compiler.startScanner();
         System.out.println(compiler.getInputData());
         compiler.compile(compiler.getInputData());
-        launch();
+        //launch();
     }
 }

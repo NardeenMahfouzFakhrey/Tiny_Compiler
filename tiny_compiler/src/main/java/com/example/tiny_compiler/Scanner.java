@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Scanner {
 
     private static int i = 0;
+    private static int line_counter = 1;
 
     String[] Reserved = {"if", "then", "end", "repeat", "until", "read", "write"};
 
@@ -13,19 +14,25 @@ public class Scanner {
         Token token = null;
         String s = "";
 
+
         if (i >= inputData.length()-1){
             token = new Token(Token.TokenType.EOS,"\0");
             return token;
         }
-        while (Character.isWhitespace(inputData.charAt(i)) || inputData.charAt(i) == '{') {
+        while (Character.isWhitespace(inputData.charAt(i)) || inputData.charAt(i) == '{' || inputData.charAt(i) == '\n' ) {
             if (inputData.charAt(i) == '{') {
                 while (inputData.charAt(i) != '}') {
                     i++;
+                    if(i >= inputData.length()-1){
+                      break;
+                    }
                 }
-                if (i >= inputData.length()) {
-                    token = new Token(Token.TokenType.ERROR,"Missing right curly bracket '}'");
+                if (i >= inputData.length()-1) {
+                    token = new Token(Token.TokenType.ERROR,"Missing right curly bracket '}' at line:" + line_counter);
                     return token;
                 }
+            } else if (inputData.charAt(i) == '\n'){
+                    line_counter++;
             }
             i++;
         }
@@ -51,6 +58,9 @@ public class Scanner {
             } else {
                 token = new Token(Token.TokenType.IDENTIFIER, s);
             }
+        }
+        else if (inputData.charAt(i) == '}'){
+            token = new Token(Token.TokenType.ERROR,String.valueOf("22fsh error fi str: " + line_counter));
         }
         else if (inputData.charAt(i) == ':' && inputData.charAt(i+1) == '=') {
             token = new Token(Token.TokenType.ASSIGN,":=");
@@ -84,7 +94,7 @@ public class Scanner {
             token = new Token(Token.TokenType.LESSTHAN,String.valueOf(inputData.charAt(i++)));
         }
         else{
-            token = new Token(Token.TokenType.ERROR,String.valueOf(inputData.charAt(i)));
+            token = new Token(Token.TokenType.ERROR,String.valueOf("There is an ERROR at line: " + line_counter));
         }
         return token;
     }

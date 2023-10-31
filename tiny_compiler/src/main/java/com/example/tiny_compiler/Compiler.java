@@ -12,6 +12,10 @@ public class Compiler {
     private Scanner scanner = new Scanner();
     private String inputData;
 
+    public ArrayList<Token> getTokenStream() {
+        return tokenStream;
+    }
+
     public String getInputData() {
         return inputData;
     }
@@ -20,14 +24,12 @@ public class Compiler {
         this.inputData = inputData;
     }
 
-    public void compile(String inputData){
+    public void compile(String inputData) throws Exception {
         //call scanner with inputData to scan function to get all tokens one by one
         scan();
     }
 
-    public ArrayList<Token> scan(){
-
-        ArrayList<Token> tokens = new ArrayList<>();
+    public ArrayList<Token> scan() throws Exception {
 
         while (true) {
             Token token = scanner.getToken(inputData);
@@ -36,15 +38,14 @@ public class Compiler {
                 break;
             }
             else if ( token.getType() == ERROR){
-                // TODO :ERROR HANDLER
-                break;
+                throw new Exception(token.getValue());
             }
-            tokens.add(token);
+            tokenStream.add(token);
         }
-        for (Token token : tokens){
+        for (Token token : tokenStream){
             System.out.println("Type: "+token.getType()+", value: "+token.getValue());
         }
-         return tokens;
+         return tokenStream;
     }
 
     public void setTokenStream(ArrayList<Token> tokenStream) {
@@ -53,7 +54,7 @@ public class Compiler {
 
     public void savedToFile(){
         try {
-        FileOutputStream fos = new FileOutputStream("OutputFiles\\output1.txt");
+        FileOutputStream fos = new FileOutputStream("OutputFiles\\output.txt");
         String tokenLine = "";
         for(int i = 0; i < tokenStream.size(); i++){
             Token token = tokenStream.get(i);
@@ -94,7 +95,7 @@ public class Compiler {
 
 
     public void readInputData(String input){
-        input = input.replaceAll("\n"," ");
+        //input = input.replaceAll("\n"," ");
        // System.out.println(input);
         setInputData(input);
     }
