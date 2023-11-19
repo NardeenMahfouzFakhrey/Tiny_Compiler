@@ -12,6 +12,7 @@ public class Compiler {
     private Scanner scanner = new Scanner();
     private String inputData;
 
+
     public ArrayList<Token> getTokenStream() {
         return tokenStream;
     }
@@ -33,12 +34,16 @@ public class Compiler {
 
         while (true) {
             Token token = scanner.getToken(inputData);
+
             if (token.getType() == EOS ){
                 savedToFile();
                 break;
             }
             else if ( token.getType() == ERROR){
-                throw new Exception(token.getValue());
+                //throw new Exception(token.getValue());
+                tokenStream.add(token);
+                savedToFile();
+                break;
             }
             tokenStream.add(token);
         }
@@ -64,13 +69,18 @@ public class Compiler {
         FileOutputStream fos = new FileOutputStream(file);
 
         String tokenLine = "";
-        for(int i = 0; i < tokenStream.size(); i++){
-            Token token = tokenStream.get(i);
-            if(i == tokenStream.size()-1)
-                tokenLine = token.getValue() +", "+ token.getType();
-            else
-                tokenLine = token.getValue() + ", " + token.getType() +"\n";
-            fos.write(tokenLine.getBytes());
+        if (tokenStream.get(tokenStream.size()-1).getType() == ERROR ){
+            fos.write(tokenStream.get(tokenStream.size()-1).getValue().getBytes());
+        }
+        else {
+            for (int i = 0; i < tokenStream.size(); i++) {
+                Token token = tokenStream.get(i);
+                if (i == tokenStream.size() - 1)
+                    tokenLine = token.getValue() + ", " + token.getType();
+                else
+                    tokenLine = token.getValue() + ", " + token.getType() + "\n";
+                fos.write(tokenLine.getBytes());
+            }
         }
         fos.flush();
         fos.close();
