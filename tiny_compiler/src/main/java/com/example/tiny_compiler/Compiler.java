@@ -42,9 +42,9 @@ public class Compiler {
             }
             tokenStream.add(token);
         }
-        for (Token token : tokenStream){
-            System.out.println("Type: "+token.getType()+", value: "+token.getValue());
-        }
+//        for (Token token : tokenStream){
+//            System.out.println("Type: "+token.getType()+", value: "+token.getValue());
+//        }
          return tokenStream;
     }
 
@@ -54,7 +54,15 @@ public class Compiler {
 
     public void savedToFile(){
         try {
-        FileOutputStream fos = new FileOutputStream("OutputFiles\\output.txt");
+        String basePath = System.getProperty("user.dir");
+
+        String filePath = basePath + File.separator + "tiny_compiler" + File.separator + "OutputFiles" + File.separator + "output.txt";
+
+        File file = new File(filePath);
+        file.getParentFile().mkdirs(); // Create directories if they don't exist
+
+        FileOutputStream fos = new FileOutputStream(file);
+
         String tokenLine = "";
         for(int i = 0; i < tokenStream.size(); i++){
             Token token = tokenStream.get(i);
@@ -66,7 +74,7 @@ public class Compiler {
         }
         fos.flush();
         fos.close();
-            ProcessBuilder pb = new ProcessBuilder("notepad.exe", "OutputFiles\\output.txt");
+            ProcessBuilder pb = new ProcessBuilder("notepad.exe",filePath );
             pb.start();
         } catch (IOException e) {
             e.printStackTrace();

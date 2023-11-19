@@ -1,3 +1,6 @@
+read, READ
+x, IDENTIFIER
+;, SEMI_COLON
 if, IF
 0, NUMBER
 <, LESSTHAN
