@@ -60,7 +60,7 @@ public class Scanner {
             }
         }
         else if (inputData.charAt(i) == '}'){
-            token = new Token(Token.TokenType.ERROR,String.valueOf("22fsh error fi str: " + line_counter));
+            token = new Token(Token.TokenType.ERROR,String.valueOf("Missing left curly bracket '{' at line: " + line_counter));
         }
         else if (inputData.charAt(i) == ':' && inputData.charAt(i+1) == '=') {
             token = new Token(Token.TokenType.ASSIGN,":=");

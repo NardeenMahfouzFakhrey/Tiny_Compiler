@@ -1,1 +1,1 @@
-Missing right curly bracket '}' at line:9
+Missing left curly bracket '{' at line: 9

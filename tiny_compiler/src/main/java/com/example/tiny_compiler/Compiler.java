@@ -124,19 +124,28 @@ public class Compiler {
         String option = scan.nextLine();
 
         switch (option){
-            case "F":
+            case "F","f":
                 System.out.println("Enter your file path: ");
                 String filePath = scan.nextLine();
                 readFile(filePath);
                 break;
-            case "C":
-                System.out.println("Enter your Code Lines: \nEnter (Enter then Ctrl+D to finish)");
+            case "C","c":
+                System.out.println("Enter your Code Lines: \nPress (Double Enter) to finish");
                 StringBuilder userInput = new StringBuilder();
-                while (scan.hasNextLine()) {
-                    String line = scan.nextLine();
-                    userInput.append(line).append("\n");
+                java.util.Scanner s = new java.util.Scanner(System.in);
+                String line;
+                while(true){
+                    line = s.nextLine();
+                    if(line.equals("")){
+                        break;
+                    }
+                    else {
+                        //System.out.println(line);
+                        userInput.append(line).append("\n");
+                    }
                 }
                 readInputData(String.valueOf(userInput));
+                System.out.println(line);
                 break;
             default:
                 System.out.println("Wrong Input Please try again");
