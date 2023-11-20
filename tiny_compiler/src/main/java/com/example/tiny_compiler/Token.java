@@ -23,6 +23,7 @@ public class Token {
         CLOSEDBRACKET,
         NUMBER,
         ERROR,
+        Comment,
         EOS
     };
     private TokenType type;

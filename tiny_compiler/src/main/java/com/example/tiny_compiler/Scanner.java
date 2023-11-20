@@ -19,7 +19,7 @@ public class Scanner {
             token = new Token(Token.TokenType.EOS,"\0");
             return token;
         }
-        while (Character.isWhitespace(inputData.charAt(i)) || inputData.charAt(i) == '{' || inputData.charAt(i) == '\n' ) {
+        while ((Character.isWhitespace(inputData.charAt(i)) || inputData.charAt(i) == '{' || inputData.charAt(i) == '\n') && i < inputData.length()-1) {
             if (inputData.charAt(i) == '{') {
                 while (inputData.charAt(i) != '}') {
                     i++;
@@ -35,6 +35,7 @@ public class Scanner {
                     line_counter++;
             }
             i++;
+
         }
         if ( Character.isDigit(inputData.charAt(i)) ) {
             while(Character.isDigit(inputData.charAt(i))){
@@ -92,6 +93,9 @@ public class Scanner {
         }
         else if (inputData.charAt(i) == '<') {
             token = new Token(Token.TokenType.LESSTHAN,String.valueOf(inputData.charAt(i++)));
+        }
+        else if (inputData.charAt(i-1) == '}'){
+            token = new Token(Token.TokenType.Comment,String.valueOf("Comment"));
         }
         else{
             token = new Token(Token.TokenType.ERROR,String.valueOf("There is an ERROR at line: " + line_counter));
