@@ -9,6 +9,10 @@ public class Scanner {
 
     String[] Reserved = {"if", "then", "end", "repeat", "until", "read", "write"};
 
+    public static void setI(int i) {
+        Scanner.i = i;
+    }
+
     public Token getToken(String inputData ){
 
         Token token = null;

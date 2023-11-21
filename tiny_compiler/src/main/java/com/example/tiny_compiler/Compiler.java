@@ -37,12 +37,14 @@ public class Compiler {
 
             if (token.getType() == EOS ){
                 savedToFile();
+                scanner.setI(0);
                 break;
             }
             else if ( token.getType() == ERROR){
                 //throw new Exception(token.getValue());
                 tokenStream.add(token);
                 savedToFile();
+                scanner.setI(0);
                 break;
             }
             tokenStream.add(token);
