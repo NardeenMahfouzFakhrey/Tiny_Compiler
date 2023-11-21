@@ -3,8 +3,7 @@ package com.example.tiny_compiler;
 import java.io.*;
 import java.util.ArrayList;
 
-import static com.example.tiny_compiler.Token.TokenType.EOS;
-import static com.example.tiny_compiler.Token.TokenType.ERROR;
+import static com.example.tiny_compiler.Token.TokenType.*;
 
 
 public class Compiler {
@@ -77,6 +76,9 @@ public class Compiler {
         else {
             for (int i = 0; i < tokenStream.size(); i++) {
                 Token token = tokenStream.get(i);
+                if (token.getType() == Comment){
+                    continue;
+                }
                 if (i == tokenStream.size() - 1)
                     tokenLine = token.getValue() + ", " + token.getType();
                 else
