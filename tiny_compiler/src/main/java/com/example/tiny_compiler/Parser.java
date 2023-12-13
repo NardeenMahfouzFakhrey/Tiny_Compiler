@@ -7,11 +7,11 @@ public class Parser {
 
     ArrayList<Token> tokens = new ArrayList<>();
     int count = 0;
-    int size=0;
+    int size = 0;
     TreeNode root;
 
     public Parser(ArrayList<Token> tokens) {
-        size= tokens.size();
+        size = tokens.size();
         this.tokens = tokens;
     }
 
@@ -65,23 +65,20 @@ public class Parser {
     //stmt-sequence → stmt-sequence ; statement  statement
     public TreeNode stmtSequence(Token token) {
         TreeNode nodeTemp;
-        Token nextToken=null;
+        Token nextToken = null;
 
-        nodeTemp=statement(token);
+        nodeTemp = statement(token);
 
-        if(count < size) {
+        if (count < size) {
             nextToken = getNextToken();
+        } else {
+            //throw error missing semicolumn
         }
 
-       else
-        {
-         //throw error missing semicolumn
-        }
-
-       while(nextToken.getType() == Token.TokenType.SEMI_COLON && count < size) {
-             nextToken =getNextToken();
-             nodeTemp.setChild(statement(nextToken));
-             //return from statmenet with what token to handle these??
+        while (nextToken.getType() == Token.TokenType.SEMI_COLON && count < size) {
+            nextToken = getNextToken();
+            nodeTemp.setChild(statement(nextToken));
+            //return from statmenet with what token to handle these??
         }
 
         //what about handling error here
@@ -92,16 +89,15 @@ public class Parser {
     //if -stmt → if exp then stmt-sequence {else stmt-sequence} end
     public TreeNode iFStmt(Token token) {
         TreeNode nodeTemp = new TreeNode(token.getValue(), String.valueOf(token.getType()));
-        Token nextToken=null;
+        Token nextToken = null;
 
         //value of current token advance what you need
         nodeTemp.setChild(exp(token));
 
-        if(count<size) {
+        if (count < size) {
             nextToken = getNextToken();
-        }
-        else {
-             //error missing then statement
+        } else {
+            //error missing then statement
         }
 
         if (!match(nextToken.getType(), Token.TokenType.THEN)) {
@@ -112,21 +108,17 @@ public class Parser {
 
 
         //advance input or already advanced
-         if(count<size) {
-             nextToken = getNextToken();
-         }
-         else {
-             //missing end of if
-         }
+        if (count < size) {
+            nextToken = getNextToken();
+        } else {
+            //missing end of if
+        }
 
         if (nextToken.getType() == Token.TokenType.ELSE) {
             nodeTemp.setChild(stmtSequence(nextToken));
-        }
-
-        else if(nextToken.getType() == Token.TokenType.END) {
-             return nodeTemp;
-        }
-        else  {
+        } else if (nextToken.getType() == Token.TokenType.END) {
+            return nodeTemp;
+        } else {
             //error missing end
         }
 
@@ -138,24 +130,152 @@ public class Parser {
         return nodeTemp;
     }
 
-    public TreeNode assignStmt(Token token) {
-        return null;
-    }
-
     public TreeNode exp(Token token) {
         return null;
     }
 
+
+    /** errors to handle
+     * 1- if count < size
+     * 2- if any non-terminal function returns error
+     * 3- if two tokens does not match
+     * **/
+
     public TreeNode repeatStmt(Token token) {
-        return null;
+        Token temp = null;
+
+        TreeNode repeatRoot = new TreeNode(token.getValue(), String.valueOf(token.getType()));
+
+        TreeNode bodyNode = null, testNode = null;
+
+        /* check if next token exists */
+        if (count < size) {
+            temp = getNextToken();
+        } else {
+            //throw error missing stmt-seq
+        }
+
+        bodyNode = stmtSequence(temp);
+
+        if (bodyNode != null) {
+            repeatRoot.setChild(bodyNode);
+
+            if (count < size) {
+                temp = getNextToken();
+            } else {
+                //throw error missing until
+            }
+
+            if (match(temp.getType(), Token.TokenType.UNTIL)) {
+
+                if (count < size) {
+                    temp = getNextToken();
+                } else {
+                    //throw error missing exp
+                }
+
+                testNode = exp(temp);
+
+                if (testNode != null) {
+                    repeatRoot.setChild(testNode);
+                } else {
+
+                    // handle error if testNode = null or error
+                }
+            }
+            else{
+                // handle if next token is not until
+            }
+        }
+        else {
+            //handle error if bodyNode = null or error
+        }
+        return repeatRoot;
     }
 
+
+    public TreeNode assignStmt(Token token) {
+        Token temp = null;
+        TreeNode assignRoot = new TreeNode(token.getValue(), String.valueOf(token.getType()));
+        TreeNode expNode = null;
+
+        if (count < size) {
+            temp = getNextToken();
+        } else {
+            //throw error missing identifier
+        }
+
+        if(match(temp.getType(),Token.TokenType.IDENTIFIER)){
+            if (count < size) {
+                temp = getNextToken();
+            } else {
+                //throw error missing :=
+            }
+
+            if(match(temp.getType(),Token.TokenType.ASSIGN)){
+                if (count < size) {
+                    temp = getNextToken();
+                } else {
+                    //throw error missing exp
+                }
+                expNode=exp(temp);
+
+                if(expNode != null){
+                    assignRoot.setChild(expNode);
+                }
+                else{
+                    //handle if exp returns error
+                }
+
+            }
+            else{
+                // next token of identifier is not as assign
+            }
+
+        }
+        else{
+            //handle if next token is not an identifier
+        }
+
+            return assignRoot;
+    }
+
+
     public TreeNode readStmt(Token token) {
-        return null;
+        Token temp = null;
+        if (count < size) {
+            temp = getNextToken();
+        } else {
+            //throw error missing identifier
+        }
+        //fixme : we passed here name of identifier as value to be prnited in tree
+        TreeNode readRoot = new TreeNode(temp.getValue(), String.valueOf(token.getType()));
+
+        if(!match(temp.getType(), Token.TokenType.IDENTIFIER)){
+            //handle error next token is not an identifier
+        }
+        return readRoot;
     }
 
     public TreeNode writeStmt(Token token) {
-        return null;
+        Token temp = null;
+        TreeNode writeRoot =  new TreeNode(token.getValue(), String.valueOf(token.getType()));
+        TreeNode expNode = null;
+
+        if (count < size) {
+            temp = getNextToken();
+        } else {
+            //throw error missing exp
+        }
+        expNode = exp(temp);
+
+        if(expNode != null){
+            writeRoot.setChild(expNode);
+        }
+        else{
+            //handle return error from exp
+        }
+        return writeRoot;
     }
 
 }
