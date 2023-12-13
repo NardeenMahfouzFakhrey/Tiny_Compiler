@@ -6,6 +6,7 @@ public class Token {
         SEMI_COLON,
         IF,
         THEN,
+        ELSE,
         END,
         REPEAT,
         UNTIL,

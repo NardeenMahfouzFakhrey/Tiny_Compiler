@@ -48,9 +48,7 @@ public class Compiler {
             }
             tokenStream.add(token);
         }
-//        for (Token token : tokenStream){
-//            System.out.println("Type: "+token.getType()+", value: "+token.getValue());
-//        }
+
          return tokenStream;
     }
 
