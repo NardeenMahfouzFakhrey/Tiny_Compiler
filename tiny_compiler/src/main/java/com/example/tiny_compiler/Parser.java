@@ -130,9 +130,6 @@ public class Parser {
         return nodeTemp;
     }
 
-    public TreeNode exp(Token token) {
-        return null;
-    }
 
 
     /** errors to handle
@@ -277,5 +274,120 @@ public class Parser {
         }
         return writeRoot;
     }
+
+
+    // exp -> simple-exp comparison-op simple-exp | simple-exp
+    public TreeNode exp(Token token) {
+        TreeNode nodeTemp = simpleexp(token);
+
+        // Check if there is a comparison operator
+        Token nextToken = null;
+        if (count < size) {
+            nextToken = getNextToken();
+        } else {
+            // error: missing comparison operator
+        }
+
+        // comparison operator???
+        if (nextToken.getType() == Token.TokenType.EQUAL) {
+
+            TreeNode comparisonNode = new TreeNode(nextToken.getValue(), String.valueOf(nextToken.getType()));
+            comparisonNode.setChild(nodeTemp);
+
+            if (count < size) {
+                nextToken = getNextToken();
+            } else {
+                // error: missing simple-exp after comparison operator
+            }
+
+            comparisonNode.setChild(simpleexp(nextToken));
+
+            return comparisonNode;
+        }
+
+        return nodeTemp;
+    }
+
+
+    //simple-exp -> simple-exp addop term | term
+    public TreeNode simpleexp(Token token) {
+        TreeNode nodeTemp;
+        Token nextToken = null;
+
+        nodeTemp = term(token);
+
+        if (count < size) {
+            nextToken = getNextToken();
+        } else {
+            //error missing addop
+        }
+
+        while ( (nextToken.getType() == Token.TokenType.PLUS || nextToken.getType() == Token.TokenType.MINUS) && count < size) {
+            nextToken = getNextToken();
+            nodeTemp.setChild(term(nextToken));
+        }
+        return nodeTemp;
+    }
+
+
+    //term -> term mulop factor | factor
+    public TreeNode term(Token token) {
+        TreeNode nodeTemp;
+        Token nextToken = null;
+
+        nodeTemp = factor(token);
+
+        if (count < size) {
+            nextToken = getNextToken();
+        } else {
+            //error missing addop
+        }
+
+        while ( (nextToken.getType() == Token.TokenType.MULT || nextToken.getType() == Token.TokenType.DIV) && count < size) {
+            nextToken = getNextToken();
+            nodeTemp.setChild(factor(nextToken));
+        }
+        return nodeTemp;
+    }
+
+    // factor -> (exp) | number | identifier
+    public TreeNode factor(Token token) {
+        TreeNode nodeTemp = null;
+
+        switch (token.getType()) {
+            case OPENBRACKET: {
+
+                if (count < size) {
+                    Token nextToken = getNextToken();
+                    nodeTemp = exp(nextToken);
+
+                    // Check for the closing parenthesis
+                    if (count < size) {
+                        Token closingbracket = getNextToken();
+                        if (match(closingbracket.getType(), Token.TokenType.CLOSEDBRACKET)) {
+                        } else {
+                            // Error: Missing closing parenthesis
+                        }
+                    } else {
+                        // Error: Missing closing parenthesis
+                    }
+                } else {
+                    // Error: Missing expression after '('
+                }
+                break;
+            }
+            case NUMBER:
+            case IDENTIFIER: {
+                nodeTemp = new TreeNode(token.getValue(), String.valueOf(token.getType()));
+                break;
+            }
+            default: {
+                // Error: Invalid factor
+                break;
+            }
+        }
+        return nodeTemp;
+    }
+
 
 }
