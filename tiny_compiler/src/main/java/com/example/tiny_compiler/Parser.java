@@ -309,46 +309,71 @@ public class Parser {
     }
 
 
-    //simple-exp -> simple-exp addop term | term
+    // simple-exp -> simple-exp addop term | term
     public TreeNode simpleexp(Token token) {
-        TreeNode nodeTemp;
+        TreeNode nodeTemp = term(token);
+
+        // Check if there is an addop
         Token nextToken = null;
-
-        nodeTemp = term(token);
-
         if (count < size) {
             nextToken = getNextToken();
         } else {
-            //error missing addop
+            // error: missing addop or term
         }
 
-        while ( (nextToken.getType() == Token.TokenType.PLUS || nextToken.getType() == Token.TokenType.MINUS) && count < size) {
-            nextToken = getNextToken();
-            nodeTemp.setChild(term(nextToken));
+        while ((nextToken.getType() == Token.TokenType.PLUS || nextToken.getType() == Token.TokenType.MINUS) && count < size) {
+
+            TreeNode addopNode = new TreeNode(nextToken.getValue(), String.valueOf(nextToken.getType()));
+            addopNode.setChild(nodeTemp);
+
+            if (count < size) {
+                nextToken = getNextToken();
+            } else {
+                // error: missing term after addop
+            }
+
+            // Set the right child
+            addopNode.setChild(term(nextToken));
+
+            // Update nodeTemp to the new addopNode
+            nodeTemp = addopNode;
         }
+
         return nodeTemp;
     }
 
 
-    //term -> term mulop factor | factor
+    // term -> term mulop factor | factor
     public TreeNode term(Token token) {
-        TreeNode nodeTemp;
+        TreeNode nodeTemp = factor(token);
+
         Token nextToken = null;
-
-        nodeTemp = factor(token);
-
         if (count < size) {
             nextToken = getNextToken();
         } else {
-            //error missing addop
+            // error: missing mulop or factor
         }
 
-        while ( (nextToken.getType() == Token.TokenType.MULT || nextToken.getType() == Token.TokenType.DIV) && count < size) {
-            nextToken = getNextToken();
-            nodeTemp.setChild(factor(nextToken));
+        while ((nextToken.getType() == Token.TokenType.MULT || nextToken.getType() == Token.TokenType.DIV) && count < size) {
+            // Create a new node for the mulop
+            TreeNode mulopNode = new TreeNode(nextToken.getValue(), String.valueOf(nextToken.getType()));
+            mulopNode.setChild(nodeTemp); // Set the left child to the current factor
+
+            if (count < size) {
+                nextToken = getNextToken();
+            } else {
+                // error: missing factor after mulop
+            }
+
+            // Set the right child
+            mulopNode.setChild(factor(nextToken));
+
+            nodeTemp = mulopNode;
         }
+
         return nodeTemp;
     }
+
 
     // factor -> (exp) | number | identifier
     public TreeNode factor(Token token) {
