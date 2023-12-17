@@ -66,20 +66,21 @@ public class SyntaxTreeGUI extends Pane {
         }
 
         //ArrayList<TreeNode> children = node.getChilds();
-        if (node.type != "READ"){
-            for (int i = 0; i < node.childs.size(); i++) {
-                double linkXStart = xPos + 0.5 * NODE_WIDTH;
-                double linkYStart = yPos + NODE_HEIGHT;
 
+        for (int i = 0; i < node.childs.size(); i++) {
+            double linkXStart = xPos + 0.5 * NODE_WIDTH;
+            double linkYStart = yPos + NODE_HEIGHT;
+            if (node.type != "READ"){
                 if(node.type != "PROGRAM") {
                     Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
                     this.getChildren().add(line);
                 }
 
                 drawTree(node.getChilds().get(i), childX, childY);
-                childX += getLevelWidth(node.childs.get(i)) * (NODE_WIDTH + NODE_GAP);
             }
+            childX += getLevelWidth(node.childs.get(i)) * (NODE_WIDTH + NODE_GAP);
         }
+
 
         // determine next tree coordinates
         double siblingX = childX + NODE_GAP;
@@ -130,8 +131,12 @@ public class SyntaxTreeGUI extends Pane {
         }
         else if(node.type == "IF" || node.type == "REPEAT" || node.type == "WRITE") {
             addTextOnNode(xPos, yPos + 22.5, node.value, strokePaint);
+        }else if (node.type == "ASSIGN"){
+            addTextOnNode(xPos, yPos + 15, node.type.toLowerCase(), strokePaint);
+
         }else {
             addTextOnNode(xPos, yPos + 15, node.value, strokePaint);
+
         }
 
         if (node.type == "READ") {

@@ -19,10 +19,9 @@ public class Parser {
 
 
     TreeNode program() {
-         TreeNode program=new TreeNode("Program", "PROGRAM");
+        TreeNode program=new TreeNode("Program", "PROGRAM");
 
         TreeNode z= program;
-
         TreeNode child = stmtSequence();
         z.setChild(child);
         return z;
@@ -36,13 +35,13 @@ public class Parser {
 
         TreeNode  root = temp;
 
-            while (!queue.isEmpty() && queue.peek().getType() == Token.TokenType.SEMI_COLON) {
-                queue.remove();
-                sibling = statement();
-                    temp.siblings=sibling;
-                    temp = temp.siblings;
+        while (!queue.isEmpty() && queue.peek().getType() == Token.TokenType.SEMI_COLON) {
+            queue.remove();
+            sibling = statement();
+            temp.siblings=sibling;
+            temp = temp.siblings;
 
-                }
+        }
         return root;
     }
 
@@ -55,10 +54,10 @@ public class Parser {
         }
         this.tokens = tokens;
     }
-     /*
+
+    /*
      *Done Testing
      */
-
     public boolean match(Token.TokenType currentToken, Token.TokenType expectedToken) {
         if (currentToken == expectedToken) {
             return true;
@@ -74,47 +73,6 @@ public class Parser {
         count++;
         return tokens.get(count);
     }
-    /*
-     *Done Testing
-     */
-    //program→ stmt-sequence
-//    public void program() {
-//        System.out.println("starting");
-//        root = new TreeNode("start", "START");
-//        //currentRoot=root;
-//        root.setChild(stmtSequence());
-//
-//        System.out.println("ending");
-//    }
-//
-//    /*
-//     *Done Testing
-//     */
-//    //stmt-sequence → stmt-sequence  ; statement |  statement
-//
-//    //stmt-sequence → statement { ;statement }
-//
-//    public TreeNode stmtSequence() {
-//        TreeNode nodeTemp;
-//        System.out.println("stmtSequence" + "token value " + queue.peek().getValue());
-//        nodeTemp = statement();
-//        if(!queue.isEmpty()){
-//        while (!queue.isEmpty() && (queue.peek().getType() == Token.TokenType.SEMI_COLON )) {
-//            System.out.println("while loop for stmt-seq "+ queue.peek().getValue());
-//            queue.remove();
-////            if (flag1==true) {
-////                currentRoot=root;
-////            }
-////            if(flag2==true){
-////                currentRoot=root;
-////            }
-////            //if assign(identifer) repeat read write
-////            currentRoot.setChild(statement());
-//         }
-//        }
-//        //what about handling error here
-//        return nodeTemp;
-//    }
 
     /*
      *Done Testing
@@ -156,10 +114,10 @@ public class Parser {
         //if
         TreeNode nodeTemp = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
         //currentRoot=nodeTemp;
-        System.out.println("if-stmt function "+ queue.peek().getValue());
-         if(!queue.isEmpty()) {
-         queue.remove();
-         }
+        //System.out.println("if-stmt function "+ queue.peek().getValue());
+        if(!queue.isEmpty()) {
+            queue.remove();
+        }
         // enter with number
         nodeTemp.setChild(exp());
 
@@ -223,26 +181,26 @@ public class Parser {
         return repeatRoot;
     }
 
-     // assignStmt -> Identifier := exp
+    // assignStmt -> Identifier := exp
     public TreeNode assignStmt() {
 
-        TreeNode assignRoot = new TreeNode("assign", "assign");
+        TreeNode assignRoot = new TreeNode("assign", "ASSIGN");
 
         TreeNode expNode = null;
-        System.out.println(" peek 1" + queue.peek().getType());
+        //System.out.println(" peek 1" + queue.peek().getType());
 
         if(match(queue.peek().getType(),Token.TokenType.IDENTIFIER)){
 
-             assignRoot.setValue(queue.peek().getValue());
-             if(!queue.isEmpty()) {
-                 queue.remove();
-             }
+            assignRoot.setValue(queue.peek().getValue());
+            if(!queue.isEmpty()) {
+                queue.remove();
+            }
             if(match(queue.peek().getType(),Token.TokenType.ASSIGN)){
                 if(!queue.isEmpty()) {
                     queue.remove();
                 }
                 // identifer expected
-                System.out.println("exp " + queue.peek().getValue());
+                //System.out.println("exp " + queue.peek().getValue());
                 expNode=exp();
 
                 if(expNode != null){
@@ -321,6 +279,7 @@ public class Parser {
         // comparison operator
         if ( !queue.isEmpty() && (queue.peek().getType() == Token.TokenType.EQUAL || queue.peek().getType()== Token.TokenType.LESSTHAN)) {
             nodeComp.setValue(queue.peek().getValue());
+            nodeComp.setType(String.valueOf(queue.peek().getType()));
             if(!queue.isEmpty()) {
                 queue.remove();
             }
@@ -390,15 +349,15 @@ public class Parser {
                     }
                     nodeTemp = exp();
 
-                        if (match(queue.peek().getType(), Token.TokenType.CLOSEDBRACKET)) {
-                            if(!queue.isEmpty()) {
-                                queue.remove();
-                            }
+                    if (match(queue.peek().getType(), Token.TokenType.CLOSEDBRACKET)) {
+                        if(!queue.isEmpty()) {
+                            queue.remove();
                         }
-                        } else {
+                    }
+                } else {
 
 
-                        }
+                }
                 break;
             }
             case NUMBER:
