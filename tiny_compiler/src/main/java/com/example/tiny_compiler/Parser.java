@@ -60,6 +60,9 @@ public class Parser {
         } else {
             ERROR = child;
         }
+        if (!queue.isEmpty()){
+            z = new TreeNode("Syntax error", "ERROR");
+        }
 
         if (ERROR.getType() == "ERROR") {
             return ERROR;
@@ -88,20 +91,15 @@ public class Parser {
             ERROR = temp;
         }
 
-        if (!queue.isEmpty() && !match(queue.peek().getType(),Token.TokenType.SEMI_COLON)){
-            ERROR = new TreeNode("Syntax Error","ERROR");
-        }
-        else {
-            while (!queue.isEmpty() && queue.peek().getType() == Token.TokenType.SEMI_COLON) {
-                queue.remove();
-                sibling = statement();
-                if(sibling.getType()!= "ERROR") {
-                    temp.siblings = sibling;
-                    temp = temp.siblings;
-                }
-                else {
-                    return sibling;
-                }
+        while (!queue.isEmpty() && queue.peek().getType() == Token.TokenType.SEMI_COLON) {
+            queue.remove();
+            sibling = statement();
+            if(sibling.getType()!= "ERROR") {
+                temp.siblings = sibling;
+                temp = temp.siblings;
+            }
+            else {
+                return sibling;
             }
         }
 
