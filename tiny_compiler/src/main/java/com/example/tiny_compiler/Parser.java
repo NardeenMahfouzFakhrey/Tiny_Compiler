@@ -1,6 +1,9 @@
 package com.example.tiny_compiler;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 
 public class Parser {
@@ -9,11 +12,52 @@ public class Parser {
     int count = 0;
     int size = 0;
     TreeNode root;
+    //Boolean flag1 = false;
+    //Boolean flag2 = false;
+    Queue<Token> queue;
+    //TreeNode currentRoot = root;
+
+
+    TreeNode program() {
+         TreeNode program=new TreeNode("Program", "program");
+
+        TreeNode z= program;
+
+        TreeNode child = stmtSequence();
+        z.setChild(child);
+        return z;
+    }
+
+    TreeNode stmtSequence() {
+        TreeNode  temp;
+        TreeNode sibling;
+
+        temp = statement();
+
+        TreeNode  root = temp;
+
+            while (!queue.isEmpty() && queue.peek().getType() == Token.TokenType.SEMI_COLON) {
+                queue.remove();
+                sibling = statement();
+                    temp.siblings=sibling;
+                    temp = temp.siblings;
+
+                }
+        return root;
+    }
+
 
     public Parser(ArrayList<Token> tokens) {
-        size = tokens.size();
+        queue = new LinkedList<>();
+
+        for(int i=0 ; i <tokens.size() ; i++) {
+            queue.add(tokens.get(i));
+        }
         this.tokens = tokens;
     }
+     /*
+     *Done Testing
+     */
 
     public boolean match(Token.TokenType currentToken, Token.TokenType expectedToken) {
         if (currentToken == expectedToken) {
@@ -22,39 +66,82 @@ public class Parser {
         return false;
     }
 
+    /*
+     *Done Testing
+     */
+
     public Token getNextToken() {
         count++;
         return tokens.get(count);
     }
-
+    /*
+     *Done Testing
+     */
     //program→ stmt-sequence
-    public void program() {
-        root = new TreeNode("start", "START");
-        root.setChild(stmtSequence(tokens.get(0)));
-    }
+//    public void program() {
+//        System.out.println("starting");
+//        root = new TreeNode("start", "START");
+//        //currentRoot=root;
+//        root.setChild(stmtSequence());
+//
+//        System.out.println("ending");
+//    }
+//
+//    /*
+//     *Done Testing
+//     */
+//    //stmt-sequence → stmt-sequence  ; statement |  statement
+//
+//    //stmt-sequence → statement { ;statement }
+//
+//    public TreeNode stmtSequence() {
+//        TreeNode nodeTemp;
+//        System.out.println("stmtSequence" + "token value " + queue.peek().getValue());
+//        nodeTemp = statement();
+//        if(!queue.isEmpty()){
+//        while (!queue.isEmpty() && (queue.peek().getType() == Token.TokenType.SEMI_COLON )) {
+//            System.out.println("while loop for stmt-seq "+ queue.peek().getValue());
+//            queue.remove();
+////            if (flag1==true) {
+////                currentRoot=root;
+////            }
+////            if(flag2==true){
+////                currentRoot=root;
+////            }
+////            //if assign(identifer) repeat read write
+////            currentRoot.setChild(statement());
+//         }
+//        }
+//        //what about handling error here
+//        return nodeTemp;
+//    }
 
+    /*
+     *Done Testing
+     */
     //statement→if- stmt,repeat-stmt,assign-stmt,read-stmt,write-stmt
-    public TreeNode statement(Token token) {
+    public TreeNode statement() {
         TreeNode nodeTemp = null;
-        switch (token.getType()) {
+        switch (queue.peek().getType()) {
             case IF: {
-                nodeTemp = iFStmt(token);
+                nodeTemp = iFStmt();
+
                 break;
             }
             case REPEAT: {
-                nodeTemp = repeatStmt(token);
+                nodeTemp = repeatStmt();
                 break;
             }
             case READ: {
-                nodeTemp = readStmt(token);
+                nodeTemp = readStmt();
                 break;
             }
             case WRITE: {
-                nodeTemp = writeStmt(token);
+                nodeTemp = writeStmt();
                 break;
             }
             case IDENTIFIER: {
-                nodeTemp = assignStmt(token);
+                nodeTemp = assignStmt();
                 break;
             }
             default: //throw error or what to do ??
@@ -62,123 +149,69 @@ public class Parser {
         return nodeTemp;
     }
 
-    //stmt-sequence → stmt-sequence ; statement  statement
-    public TreeNode stmtSequence(Token token) {
-        TreeNode nodeTemp;
-        Token nextToken = null;
 
-        nodeTemp = statement(token);
 
-        if (count < size) {
-            nextToken = getNextToken();
-        } else {
-            //throw error missing semicolumn
+    //if -stmt → if exp then stmt-sequence end
+    public TreeNode iFStmt() {
+        //if
+        TreeNode nodeTemp = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
+        //currentRoot=nodeTemp;
+        System.out.println("if-stmt function "+ queue.peek().getValue());
+         if(!queue.isEmpty()) {
+         queue.remove();
+         }
+        // enter with number
+        nodeTemp.setChild(exp());
+
+        if (match(queue.peek().getType(), Token.TokenType.THEN )) {
+            if(!queue.isEmpty()) {
+                queue.remove();
+            }
+            nodeTemp.setChild(stmtSequence());
         }
 
-        while (nextToken.getType() == Token.TokenType.SEMI_COLON && count < size) {
-            nextToken = getNextToken();
-            nodeTemp.setChild(statement(nextToken));
-            //return from statmenet with what token to handle these??
+        if (match(queue.peek().getType(), Token.TokenType.END)){
+            if(!queue.isEmpty()) {
+                queue.remove();
+                //flag1=true;
+            }
         }
-
-        //what about handling error here
         return nodeTemp;
     }
-
-
-    //if -stmt → if exp then stmt-sequence {else stmt-sequence} end
-    public TreeNode iFStmt(Token token) {
-        TreeNode nodeTemp = new TreeNode(token.getValue(), String.valueOf(token.getType()));
-        Token nextToken = null;
-
-        //value of current token advance what you need
-        nodeTemp.setChild(exp(token));
-
-        if (count < size) {
-            nextToken = getNextToken();
-        } else {
-            //error missing then statement
-        }
-
-        if (!match(nextToken.getType(), Token.TokenType.THEN)) {
-            //throwerror
-        }
-
-        nodeTemp.setChild(stmtSequence(nextToken));
-
-
-        //advance input or already advanced
-        if (count < size) {
-            nextToken = getNextToken();
-        } else {
-            //missing end of if
-        }
-
-        if (nextToken.getType() == Token.TokenType.ELSE) {
-            nodeTemp.setChild(stmtSequence(nextToken));
-        } else if (nextToken.getType() == Token.TokenType.END) {
-            return nodeTemp;
-        } else {
-            //error missing end
-        }
-
-        nextToken = getNextToken();
-        if (!match(nextToken.getType(), Token.TokenType.END)) {
-            //throwerror missing end
-        }
-
-        return nodeTemp;
-    }
-
-
 
     /** errors to handle
      * 1- if count < size
      * 2- if any non-terminal function returns error
      * 3- if two tokens does not match
      * **/
-
-    public TreeNode repeatStmt(Token token) {
-        Token temp = null;
-
-        TreeNode repeatRoot = new TreeNode(token.getValue(), String.valueOf(token.getType()));
+    //repeat->stmt-sequence until exp
+    public TreeNode repeatStmt() {
+        TreeNode repeatRoot = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
+        //currentRoot=repeatRoot;
+        if(!queue.isEmpty()) {
+            queue.remove();
+        }
 
         TreeNode bodyNode = null, testNode = null;
 
-        /* check if next token exists */
-        if (count < size) {
-            temp = getNextToken();
-        } else {
-            //throw error missing stmt-seq
-        }
-
-        bodyNode = stmtSequence(temp);
+        bodyNode = stmtSequence();
 
         if (bodyNode != null) {
             repeatRoot.setChild(bodyNode);
 
-            if (count < size) {
-                temp = getNextToken();
-            } else {
-                //throw error missing until
-            }
-
-            if (match(temp.getType(), Token.TokenType.UNTIL)) {
-
-                if (count < size) {
-                    temp = getNextToken();
-                } else {
-                    //throw error missing exp
+            if (match(queue.peek().getType(), Token.TokenType.UNTIL)) {
+                if(!queue.isEmpty()) {
+                    queue.remove();
                 }
-
-                testNode = exp(temp);
-
+                // identifer expected
+                testNode = exp();
                 if (testNode != null) {
                     repeatRoot.setChild(testNode);
+                    //flag2 = true;
                 } else {
-
                     // handle error if testNode = null or error
                 }
+
             }
             else{
                 // handle if next token is not until
@@ -190,32 +223,27 @@ public class Parser {
         return repeatRoot;
     }
 
+     // assignStmt -> Identifier := exp
+    public TreeNode assignStmt() {
 
-    public TreeNode assignStmt(Token token) {
-        Token temp = null;
-        TreeNode assignRoot = new TreeNode(token.getValue(), String.valueOf(token.getType()));
+        TreeNode assignRoot = new TreeNode("assign", "assign");
+
         TreeNode expNode = null;
+        System.out.println(" peek 1" + queue.peek().getType());
 
-        if (count < size) {
-            temp = getNextToken();
-        } else {
-            //throw error missing identifier
-        }
+        if(match(queue.peek().getType(),Token.TokenType.IDENTIFIER)){
 
-        if(match(temp.getType(),Token.TokenType.IDENTIFIER)){
-            if (count < size) {
-                temp = getNextToken();
-            } else {
-                //throw error missing :=
-            }
-
-            if(match(temp.getType(),Token.TokenType.ASSIGN)){
-                if (count < size) {
-                    temp = getNextToken();
-                } else {
-                    //throw error missing exp
+             assignRoot.setValue(queue.peek().getValue());
+             if(!queue.isEmpty()) {
+                 queue.remove();
+             }
+            if(match(queue.peek().getType(),Token.TokenType.ASSIGN)){
+                if(!queue.isEmpty()) {
+                    queue.remove();
                 }
-                expNode=exp(temp);
+                // identifer expected
+                System.out.println("exp " + queue.peek().getValue());
+                expNode=exp();
 
                 if(expNode != null){
                     assignRoot.setChild(expNode);
@@ -233,38 +261,43 @@ public class Parser {
         else{
             //handle if next token is not an identifier
         }
-
-            return assignRoot;
+        return assignRoot;
     }
 
-
-    public TreeNode readStmt(Token token) {
-        Token temp = null;
-        if (count < size) {
-            temp = getNextToken();
-        } else {
-            //throw error missing identifier
+    /*
+     *Done Testing
+     */
+    // read - > read identifer
+    public TreeNode readStmt() {
+        TreeNode readRoot = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
+        if(!queue.isEmpty()) {
+            queue.remove();
         }
-        //fixme : we passed here name of identifier as value to be prnited in tree
-        TreeNode readRoot = new TreeNode(temp.getValue(), String.valueOf(token.getType()));
 
-        if(!match(temp.getType(), Token.TokenType.IDENTIFIER)){
+        if(!match(queue.peek().getType(), Token.TokenType.IDENTIFIER)){
             //handle error next token is not an identifier
+        }
+        else {
+            readRoot.setChild(new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType())));
+            if(!queue.isEmpty()) {
+                queue.remove();
+            }
         }
         return readRoot;
     }
 
-    public TreeNode writeStmt(Token token) {
-        Token temp = null;
-        TreeNode writeRoot =  new TreeNode(token.getValue(), String.valueOf(token.getType()));
+
+    // write -> write exp
+
+    public TreeNode writeStmt() {
+        TreeNode writeRoot =  new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
         TreeNode expNode = null;
 
-        if (count < size) {
-            temp = getNextToken();
-        } else {
-            //throw error missing exp
+        if(!queue.isEmpty()) {
+            queue.remove();
         }
-        expNode = exp(temp);
+        // identifier expected
+        expNode = exp();
 
         if(expNode != null){
             writeRoot.setChild(expNode);
@@ -277,133 +310,103 @@ public class Parser {
 
 
     // exp -> simple-exp comparison-op simple-exp | simple-exp
-    public TreeNode exp(Token token) {
-        TreeNode nodeTemp = simpleexp(token);
 
-        // Check if there is a comparison operator
-        Token nextToken = null;
-        if (count < size) {
-            nextToken = getNextToken();
-        } else {
-            // error: missing comparison operator
-        }
+    public TreeNode exp() {
+        // identifer
+        TreeNode nodeComp = new TreeNode("op" , "comparsion");
+        // da5l bl identifer
+        TreeNode nodeTemp = simpleexp();
+        nodeComp.setChild(nodeTemp);
 
-        // comparison operator???
-        if (nextToken.getType() == Token.TokenType.EQUAL) {
-
-            TreeNode comparisonNode = new TreeNode(nextToken.getValue(), String.valueOf(nextToken.getType()));
-            comparisonNode.setChild(nodeTemp);
-
-            if (count < size) {
-                nextToken = getNextToken();
-            } else {
-                // error: missing simple-exp after comparison operator
+        // comparison operator
+        if ( !queue.isEmpty() && (queue.peek().getType() == Token.TokenType.EQUAL || queue.peek().getType()== Token.TokenType.LESSTHAN)) {
+            nodeComp.setValue(queue.peek().getValue());
+            if(!queue.isEmpty()) {
+                queue.remove();
             }
-
-            comparisonNode.setChild(simpleexp(nextToken));
-
-            return comparisonNode;
+            nodeComp.setChild(simpleexp());
+            return nodeComp;
         }
-
         return nodeTemp;
     }
 
 
     // simple-exp -> simple-exp addop term | term
-    public TreeNode simpleexp(Token token) {
-        TreeNode nodeTemp = term(token);
 
-        // Check if there is an addop
-        Token nextToken = null;
-        if (count < size) {
-            nextToken = getNextToken();
-        } else {
-            // error: missing addop or term
-        }
+    // simple-exp -> term {addop term}
 
-        while ((nextToken.getType() == Token.TokenType.PLUS || nextToken.getType() == Token.TokenType.MINUS) && count < size) {
+    public TreeNode simpleexp() {
+        // identifier exits
+        TreeNode nodeTemp = term();
 
-            TreeNode addopNode = new TreeNode(nextToken.getValue(), String.valueOf(nextToken.getType()));
+        while (( !queue.isEmpty()) && (queue.peek().getType() == Token.TokenType.PLUS || queue.peek().getType() == Token.TokenType.MINUS)) {
+            TreeNode addopNode = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
+
             addopNode.setChild(nodeTemp);
 
-            if (count < size) {
-                nextToken = getNextToken();
-            } else {
-                // error: missing term after addop
+            if(!queue.isEmpty()) {
+                queue.remove();
             }
-
             // Set the right child
-            addopNode.setChild(term(nextToken));
-
+            // identifer
+            addopNode.setChild(term());
             // Update nodeTemp to the new addopNode
             nodeTemp = addopNode;
         }
-
         return nodeTemp;
     }
 
 
     // term -> term mulop factor | factor
-    public TreeNode term(Token token) {
-        TreeNode nodeTemp = factor(token);
+    // term -> factor {mulop factor}
 
-        Token nextToken = null;
-        if (count < size) {
-            nextToken = getNextToken();
-        } else {
-            // error: missing mulop or factor
-        }
+    public TreeNode term() {
 
-        while ((nextToken.getType() == Token.TokenType.MULT || nextToken.getType() == Token.TokenType.DIV) && count < size) {
+        TreeNode nodeTemp = factor();
+
+        while (((!queue.isEmpty()) && (queue.peek().getType() == Token.TokenType.MULT || queue.peek().getType() == Token.TokenType.DIV))) {
+
             // Create a new node for the mulop
-            TreeNode mulopNode = new TreeNode(nextToken.getValue(), String.valueOf(nextToken.getType()));
+            TreeNode mulopNode = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
             mulopNode.setChild(nodeTemp); // Set the left child to the current factor
 
-            if (count < size) {
-                nextToken = getNextToken();
-            } else {
-                // error: missing factor after mulop
+            if(!queue.isEmpty()) {
+                queue.remove();
             }
-
-            // Set the right child
-            mulopNode.setChild(factor(nextToken));
-
+            mulopNode.setChild(factor());
             nodeTemp = mulopNode;
         }
-
         return nodeTemp;
     }
 
-
     // factor -> (exp) | number | identifier
-    public TreeNode factor(Token token) {
+    public TreeNode factor() {
         TreeNode nodeTemp = null;
-
-        switch (token.getType()) {
+        switch (queue.peek().getType()) {
             case OPENBRACKET: {
-
-                if (count < size) {
-                    Token nextToken = getNextToken();
-                    nodeTemp = exp(nextToken);
-
-                    // Check for the closing parenthesis
-                    if (count < size) {
-                        Token closingbracket = getNextToken();
-                        if (match(closingbracket.getType(), Token.TokenType.CLOSEDBRACKET)) {
-                        } else {
-                            // Error: Missing closing parenthesis
-                        }
-                    } else {
-                        // Error: Missing closing parenthesis
+                if (count < size - 1) {
+                    if(!queue.isEmpty()) {
+                        queue.remove();
                     }
-                } else {
-                    // Error: Missing expression after '('
-                }
+                    nodeTemp = exp();
+
+                        if (match(queue.peek().getType(), Token.TokenType.CLOSEDBRACKET)) {
+                            if(!queue.isEmpty()) {
+                                queue.remove();
+                            }
+                        }
+                        } else {
+
+
+                        }
                 break;
             }
             case NUMBER:
             case IDENTIFIER: {
-                nodeTemp = new TreeNode(token.getValue(), String.valueOf(token.getType()));
+                nodeTemp = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
+                if(!queue.isEmpty()) {
+                    queue.remove();
+                }
                 break;
             }
             default: {
@@ -413,6 +416,4 @@ public class Parser {
         }
         return nodeTemp;
     }
-
-
 }

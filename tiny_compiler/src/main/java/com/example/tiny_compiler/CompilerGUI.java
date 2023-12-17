@@ -63,6 +63,11 @@ public class CompilerGUI extends Application {
             compiler.setInputData(codeLines);
             try {
                  compiler.compile(compiler.getInputData());
+                 Parser parser = new Parser(compiler.getTokenStream());
+                 parser.program();
+//                System.out.println(parser.root.childs.get(0).childs.get(0).getValue());
+//                System.out.println(parser.root.childs.get(1).getValue());
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -80,6 +85,22 @@ public class CompilerGUI extends Application {
 //        Compiler compiler = new Compiler();
 //        compiler.startScanner();
 //        compiler.compile(compiler.getInputData());
-        launch();
+        //launch();
+        Compiler compiler = new Compiler();
+        compiler.setInputData("{ Sample program in TINY language – computes factorial\n" +
+                "}\n" +
+                "read x; {input an integer }\n" +
+                "if 0 < x then { don’t compute if x <= 0 }\n" +
+                "fact := 1;\n" +
+                "repeat\n" +
+                "fact := fact * x;\n" +
+                "x := x - 1\n" +
+                "until x = 0;\n" +
+                "write fact { output factorial of x }\n" +
+                "end ");
+        compiler.compile("");
+        Parser parser = new Parser(compiler.getTokenStream());
+        TreeNode z =parser.program();
+        System.out.println(parser.root);
     }
 }
