@@ -9,7 +9,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class SyntaxTreeGUI extends Pane {
         drawTree(root, 50, 50);
     }
 
-    private void clear() {
+    public void clear() {
         this.getChildren().clear();
     }
 
@@ -44,10 +43,10 @@ public class SyntaxTreeGUI extends Pane {
         if(node.type != "PROGRAM"){
             Color strokePaint;
             if (statements.contains(node.type)) {
-                strokePaint = Color.rgb(102, 21, 19);
+                strokePaint = Color.BLACK;
                 addRectangle(xPos, yPos, strokePaint);
             } else {
-                strokePaint = Color.rgb(48, 89, 164);
+                strokePaint = Color.DARKRED;
                 addEllipse(xPos, yPos, strokePaint);
             }
 
@@ -176,32 +175,6 @@ public class SyntaxTreeGUI extends Pane {
         }
         return width + getLevelWidth(root.siblings);
     }
-//    public static int getLevelWidth(TreeNode root, int i) {
-//        if (root.childs.get(i) == null)
-//            return 0;
-//
-//        int width = 0;
-//        int numOfChildren = root.childs.get(i).childs.size();
-//
-//        if (numOfChildren == 0) {
-//            if (i >= numOfChildren) {
-//                return 1;
-//            } else {
-//                width = 1;
-//            }
-//        }
-//
-//        for (int j = 0; j < numOfChildren; j++) {
-//            width += getLevelWidth(root.childs.get(i),j);
-//        }
-//
-//        if (i >= numOfChildren-1){
-//            return width;
-//        }
-//        else {
-//            return width + getLevelWidth(root, ++i);
-//        }
-//    }
 
     private void adjustBounds(double x, double y) {
         if (x > this.getWidth()) {

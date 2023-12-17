@@ -5,7 +5,6 @@ import java.util.ArrayList;
 public class TreeNode {
     public String value;
     public String type;
-    TreeNode nextNode = null;
     public ArrayList<TreeNode> childs= new ArrayList<>();
     TreeNode siblings;
 
