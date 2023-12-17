@@ -1,91 +1,100 @@
 package com.example.tiny_compiler;
 
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+        import javafx.application.Application;
+        import javafx.scene.Scene;
+        import javafx.stage.Stage;
 
 public class CompilerGUI extends Application {
 
     public String codeLines = "";
-    @Override
-    public void start(Stage stage) throws IOException {
+    //    @Override
+//    public void start(Stage stage) throws IOException {
+//
+//
+//        Label label;
+//        TextArea linesTextArea = new TextArea();
+//        Button scanButton = new Button("Scan");
+//        linesTextArea.setPrefHeight(100);
+//        stage.setTitle("Scanner");
+//        label = new Label("Browse text file or Write code");
+//        label.setFont(Font.font("Arial" , FontWeight.NORMAL , 20));
+//        ///
+//        Button button = new Button("Browse");
+//
+//        EventHandler<ActionEvent> event1 = e -> {
+//            FileChooser filechooser = new FileChooser();
+//            File file;
+//            Compiler compiler = new Compiler();
+//            compiler.setInputData(null);
+//            file = filechooser.showOpenDialog(stage);
+//            if (file != null) {
+//                compiler.readFile(file.getAbsolutePath());
+//                try {
+//                    compiler.compile(compiler.getInputData());
+//                } catch (Exception ex) {
+//                    throw new RuntimeException(ex);
+//                }
+//            }
+//        }; button.setOnAction(event1);
+//
+//        scanButton.setOnAction(action -> {
+//            Compiler compiler = new Compiler();
+//            //compiler.setInputData(null);
+//            codeLines = "";
+//            codeLines = linesTextArea.getText()+" ";
+//            System.out.println(codeLines);
+//            compiler.setInputData(codeLines);
+//            try {
+//                 compiler.compile(compiler.getInputData());
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//        ///
+//        VBox vbox = new VBox(50,label ,button,linesTextArea,scanButton);
+//        vbox.setAlignment(Pos.CENTER);
+//        Scene scene = new Scene(vbox,550, 400);
+//        stage.setScene(scene);
+//        stage.show();
+//    }
+    public static TreeNode takeInput(){
+        TreeNode node = new TreeNode("start", "START");
+        TreeNode readNode = new TreeNode("read","READ");
 
+        TreeNode id = new TreeNode("x","IDENTIFIER");
+        readNode.setChild(id);
+        TreeNode ifNode = new TreeNode("if","IF");
+        TreeNode cond = new TreeNode("<","LESSTHAN");
+        TreeNode cond1 = new TreeNode("5","NUMBER");
+        TreeNode thenNode = new TreeNode("then","THEN");
+        TreeNode assign = new TreeNode("x","ASSIGN");
+        TreeNode op = new TreeNode("+","PLUS");
+        TreeNode par1= new TreeNode("x","IDENTIFIER");
+        TreeNode par2= new TreeNode("3","NUMBER");
 
-        Label label;
-        TextArea linesTextArea = new TextArea();
-        Button scanButton = new Button("Scan");
-        linesTextArea.setPrefHeight(100);
-        stage.setTitle("Scanner");
-        label = new Label("Browse text file or Write code");
-        label.setFont(Font.font("Arial" , FontWeight.NORMAL , 20));
-        ///
-        Button button = new Button("Browse");
-
-        EventHandler<ActionEvent> event1 = e -> {
-            FileChooser filechooser = new FileChooser();
-            File file;
-            Compiler compiler = new Compiler();
-            compiler.setInputData(null);
-            file = filechooser.showOpenDialog(stage);
-            if (file != null) {
-                compiler.readFile(file.getAbsolutePath());
-                try {
-                    compiler.compile(compiler.getInputData());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        }; button.setOnAction(event1);
-
-        scanButton.setOnAction(action -> {
-            Compiler compiler = new Compiler();
-            //compiler.setInputData(null);
-            codeLines = "";
-            codeLines = linesTextArea.getText()+" ";
-            System.out.println(codeLines);
-            compiler.setInputData(codeLines);
-            try {
-                 compiler.compile(compiler.getInputData());
-                 Parser parser = new Parser(compiler.getTokenStream());
-                 parser.program();
-//                System.out.println(parser.root.childs.get(0).childs.get(0).getValue());
-//                System.out.println(parser.root.childs.get(1).getValue());
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        ///
-        VBox vbox = new VBox(50,label ,button,linesTextArea,scanButton);
-        vbox.setAlignment(Pos.CENTER);
-        Scene scene = new Scene(vbox,550, 400);
-        stage.setScene(scene);
-        stage.show();
+        op.setChild(par1);
+        op.setChild(par2);
+        assign.setChild(op);
+        thenNode.setChild(readNode);
+        thenNode.setChild(assign);
+        cond.setChild(id);
+        cond.setChild(cond1);
+        ifNode.setChild(cond);
+        ifNode.setChild(thenNode);
+        node.setChild(readNode);
+        node.setChild(ifNode);
+        node.setChild(readNode);
+        return assign;
     }
 
-    public static void main(String[] args) throws Exception {
+    @Override
+    public void start(Stage stage) throws Exception {
 
-//        Compiler compiler = new Compiler();
-//        compiler.startScanner();
-//        compiler.compile(compiler.getInputData());
-        //launch();
+        stage.setTitle("Syntax Tree");
+
+//        SyntaxTreeGUI syntaxTreeGUI = new SyntaxTreeGUI();
+//        syntaxTreeGUI.setSyntaxTree(takeInput()); // Set the syntax tree
+
         Compiler compiler = new Compiler();
         compiler.setInputData("{ Sample program in TINY language – computes factorial\n" +
                 "}\n" +
@@ -98,9 +107,32 @@ public class CompilerGUI extends Application {
                 "until x = 0;\n" +
                 "write fact { output factorial of x }\n" +
                 "end ");
-        compiler.compile("");
+
+        compiler.compile(compiler.getInputData());
         Parser parser = new Parser(compiler.getTokenStream());
-        TreeNode z =parser.program();
-        System.out.println(parser.root);
+
+        SyntaxTreeGUI syntaxTreeGUI = new SyntaxTreeGUI();
+        syntaxTreeGUI.setSyntaxTree(parser.program()); // Set the syntax tree
+
+        Scene scene = new Scene(syntaxTreeGUI, 800, 800);
+        stage.setScene(scene);
+
+        // Ensure the pane is resized when the scene is shown
+        scene.widthProperty().addListener((observable, oldValue, newValue) -> {
+            syntaxTreeGUI.setPrefWidth((Double) newValue);
+            syntaxTreeGUI.setSyntaxTree(takeInput());
+        });
+
+        stage.show();
+
+    }
+
+
+    public static void main(String[] args) throws Exception {
+
+//        Compiler compiler = new Compiler();
+//        compiler.startScanner();
+//        compiler.compile(compiler.getInputData());
+        launch();
     }
 }

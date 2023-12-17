@@ -19,7 +19,7 @@ public class Parser {
 
 
     TreeNode program() {
-         TreeNode program=new TreeNode("Program", "program");
+         TreeNode program=new TreeNode("Program", "PROGRAM");
 
         TreeNode z= program;
 
