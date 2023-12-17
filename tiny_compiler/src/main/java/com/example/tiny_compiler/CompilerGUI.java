@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static com.example.tiny_compiler.Token.TokenType.ERROR;
+
 public class CompilerGUI extends Application {
 
     public String codeLines = "";
@@ -123,13 +125,17 @@ public class CompilerGUI extends Application {
     }
 
     public void showParsing(ArrayList<Token> treeNode) {
-        Parser parser = new Parser(treeNode);
-        TreeNode root = parser.program();
-        if (root.childs.get(0).getType() == "ERROR"){
-            showAlert("Error in Tiny Compiler", root.childs.get(0).getValue());
-            return;
+        if (treeNode.get(treeNode.size()-1).getType() == ERROR ){
+            showAlert("Error in Tiny Compiler",treeNode.get(treeNode.size()-1).getValue());
+        }else{
+            Parser parser = new Parser(treeNode);
+            TreeNode root = parser.program();
+            if (root.getType() == "ERROR"){
+                showAlert("Error in Tiny Compiler", root.getValue());
+                return;
+            }
+            syntaxTreeGUI.setSyntaxTree(root);
         }
-        syntaxTreeGUI.setSyntaxTree(root);
     }
 
     public static void main(String[] args) throws Exception {

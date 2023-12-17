@@ -87,7 +87,7 @@ public class Compiler {
         fos.flush();
         fos.close();
             ProcessBuilder pb = new ProcessBuilder("notepad.exe",filePath );
-            //pb.start();
+            pb.start();
         } catch (IOException e) {
             e.printStackTrace();
         }

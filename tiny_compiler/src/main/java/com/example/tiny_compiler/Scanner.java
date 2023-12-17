@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Scanner {
 
     private static int i = 0;
-    private static int line_counter = 1;
+    private int line_counter = 1;
 
     String[] Reserved = {"if", "then", "end", "repeat", "until", "read", "write"};
 

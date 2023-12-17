@@ -35,68 +35,71 @@ public class SyntaxTreeGUI extends Pane {
     }
 
     void drawTree(TreeNode node, double xPos, double yPos) {
-
+        
         if (node == null) {
             return;
         }
+        if(node.value == "op"){
+            drawTree(node.children.get(0),xPos,yPos);
+        }else {
 
-        if(node.type != "PROGRAM"){
-            Color strokePaint;
-            if (statements.contains(node.type)) {
-                strokePaint = Color.BLACK;
-                addRectangle(xPos, yPos, strokePaint);
-            } else {
-                strokePaint = Color.DARKRED;
-                addEllipse(xPos, yPos, strokePaint);
-            }
-
-            addText(xPos, yPos, node, strokePaint);
-        }
-
-        double childX = xPos;
-        double childY = yPos + 2 * NODE_HEIGHT;
-        int numOfChildren = node.childs.size();
-        if (numOfChildren > 0) {
-            double branchesGap = numOfChildren * (NODE_WIDTH + NODE_GAP) - NODE_GAP;
-            childX -= 0.5 * (branchesGap - NODE_WIDTH);
-            childX = ensureNotOverlapped(childX, childY);
-        } else {
-            childX += 2 * NODE_WIDTH;
-        }
-
-        //ArrayList<TreeNode> children = node.getChilds();
-
-        for (int i = 0; i < node.childs.size(); i++) {
-            double linkXStart = xPos + 0.5 * NODE_WIDTH;
-            double linkYStart = yPos + NODE_HEIGHT;
-            if (node.type != "READ"){
-                if(node.type != "PROGRAM") {
-                    Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
-                    this.getChildren().add(line);
+            if (node.type != "PROGRAM") {
+                Color strokePaint;
+                if (statements.contains(node.type)) {
+                    strokePaint = Color.BLACK;
+                    addRectangle(xPos, yPos, strokePaint);
+                } else {
+                    strokePaint = Color.DARKRED;
+                    addEllipse(xPos, yPos, strokePaint);
                 }
 
-                drawTree(node.getChilds().get(i), childX, childY);
+                addText(xPos, yPos, node, strokePaint);
             }
-            childX += getLevelWidth(node.childs.get(i)) * (NODE_WIDTH + NODE_GAP);
+
+            double childX = xPos;
+            double childY = yPos + 2 * NODE_HEIGHT;
+            int numOfChildren = node.children.size();
+            if (numOfChildren > 0) {
+                double branchesGap = numOfChildren * (NODE_WIDTH + NODE_GAP) - NODE_GAP;
+                childX -= 0.5 * (branchesGap - NODE_WIDTH);
+                childX = ensureNotOverlapped(childX, childY);
+            } else {
+                childX += 2 * NODE_WIDTH;
+            }
+
+            //ArrayList<TreeNode> children = node.getChilds();
+
+            for (int i = 0; i < node.children.size(); i++) {
+                double linkXStart = xPos + 0.5 * NODE_WIDTH;
+                double linkYStart = yPos + NODE_HEIGHT;
+                if (node.type != "READ") {
+                    if (node.type != "PROGRAM") {
+                        Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
+                        this.getChildren().add(line);
+                    }
+
+                    drawTree(node.getChilds().get(i), childX, childY);
+                }
+                childX += getLevelWidth(node.children.get(i)) * (NODE_WIDTH + NODE_GAP);
+            }
+
+
+            // determine next tree coordinates
+            double siblingX = childX + NODE_GAP;
+            double siblingLinkY = yPos + 0.5 * NODE_HEIGHT;
+
+            // add next tree
+            TreeNode siblingTree = node.siblings;
+            drawTree(siblingTree, siblingX, yPos);
+            if (siblingTree != null) {
+                Line line = new Line(xPos + NODE_WIDTH, siblingLinkY, siblingX, siblingLinkY);
+                this.getChildren().add(line);
+            }
+
+            // adjust pane size
+            double boundX = siblingX + getLevelWidth(siblingTree) * (NODE_WIDTH + NODE_GAP);
+            adjustBounds(boundX, childY);
         }
-
-
-        // determine next tree coordinates
-        double siblingX = childX + NODE_GAP;
-        double siblingLinkY = yPos + 0.5 * NODE_HEIGHT;
-
-        // add next tree
-        TreeNode siblingTree = node.siblings;
-        drawTree(siblingTree, siblingX, yPos);
-        if (siblingTree != null) {
-            Line line = new Line(xPos + NODE_WIDTH, siblingLinkY, siblingX, siblingLinkY);
-            this.getChildren().add(line);
-        }
-
-        // adjust pane size
-        double boundX = siblingX + getLevelWidth(siblingTree) * (NODE_WIDTH + NODE_GAP);
-        adjustBounds(boundX, childY);
-
 
     }
     private void addEllipse(double xPos, double yPos, Color strokePaint) {
@@ -139,7 +142,7 @@ public class SyntaxTreeGUI extends Pane {
         }
 
         if (node.type == "READ") {
-            addTextOnNode(xPos, yPos + 30, "(" + node.childs.get(0).getValue() + ")", strokePaint);
+            addTextOnNode(xPos, yPos + 30, "(" + node.children.get(0).getValue() + ")", strokePaint);
         }else if (valuesNodes.contains(node.type) || ops.contains(node.type)){
             addTextOnNode(xPos, yPos + 30, "(" + node.getValue() + ")", strokePaint);
         }
@@ -160,7 +163,7 @@ public class SyntaxTreeGUI extends Pane {
             return 0;
 
         int width = 0;
-        int numOfChildren = root.childs.size();
+        int numOfChildren = root.children.size();
 
         if (numOfChildren == 0) {
             if (root.siblings == null) {
@@ -171,7 +174,7 @@ public class SyntaxTreeGUI extends Pane {
         }
 
         for (int i = 0; i < numOfChildren; i++) {
-            width += getLevelWidth(root.childs.get(i));
+            width += getLevelWidth(root.children.get(i));
         }
         return width + getLevelWidth(root.siblings);
     }

@@ -2,7 +2,6 @@ package com.example.tiny_compiler;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.PriorityQueue;
 import java.util.Queue;
 
 
@@ -12,51 +11,30 @@ public class Parser {
     int count = 0;
     int size = 0;
     TreeNode root;
-    //Boolean flag1 = false;
-    //Boolean flag2 = false;
+
     Queue<Token> queue;
-    //TreeNode currentRoot = root;
 
 
-    TreeNode program() {
-        TreeNode program=new TreeNode("Program", "PROGRAM");
-
-        TreeNode z= program;
-        TreeNode child = stmtSequence();
-        z.setChild(child);
-        return z;
-    }
-
-    TreeNode stmtSequence() {
-        TreeNode  temp;
-        TreeNode sibling;
-
-        temp = statement();
-
-        TreeNode  root = temp;
-
-        while (!queue.isEmpty() && queue.peek().getType() == Token.TokenType.SEMI_COLON) {
-            queue.remove();
-            sibling = statement();
-            temp.siblings=sibling;
-            temp = temp.siblings;
-
-        }
-        return root;
-    }
-
-
+    /**
+     * create queue to hold tokens
+     *
+     * @param tokens
+     */
     public Parser(ArrayList<Token> tokens) {
         queue = new LinkedList<>();
 
-        for(int i=0 ; i <tokens.size() ; i++) {
+        for (int i = 0; i < tokens.size(); i++) {
             queue.add(tokens.get(i));
         }
         this.tokens = tokens;
     }
 
-    /*
-     *Done Testing
+    /**
+     * compare current token with expected token
+     *
+     * @param currentToken
+     * @param expectedToken
+     * @return boolean
      */
     public boolean match(Token.TokenType currentToken, Token.TokenType expectedToken) {
         if (currentToken == expectedToken) {
@@ -65,88 +43,209 @@ public class Parser {
         return false;
     }
 
-    /*
-     *Done Testing
-     */
 
-    public Token getNextToken() {
-        count++;
-        return tokens.get(count);
+    /**
+     * create main root of program and initialize parsing
+     *
+     * @return TreeNode
+     */
+    TreeNode program() {
+        TreeNode program = new TreeNode("Program", "PROGRAM");
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+
+        TreeNode z = program;
+        TreeNode child = stmtSequence();
+        if (child.getType() != "ERROR") {
+            z.setChild(child);
+        } else {
+            ERROR = child;
+        }
+
+        if (ERROR.getType() == "ERROR") {
+            return ERROR;
+        } else {
+            return z;
+        }
     }
 
-    /*
-     *Done Testing
+
+    /**
+     * stmt-sequence → statement { ;statement }
+     *
+     * @return TreeNode
      */
-    //statement→if- stmt,repeat-stmt,assign-stmt,read-stmt,write-stmt
+    TreeNode stmtSequence() {
+        TreeNode temp;
+        TreeNode sibling;
+        TreeNode root = null;
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+
+        temp = statement();
+
+        if (temp.getType() != "ERROR") {
+            root = temp;
+        } else {
+            ERROR = temp;
+        }
+
+        if (!queue.isEmpty() && !match(queue.peek().getType(),Token.TokenType.SEMI_COLON)){
+            ERROR = new TreeNode("Syntax Error","ERROR");
+        }
+        else {
+            while (!queue.isEmpty() && queue.peek().getType() == Token.TokenType.SEMI_COLON) {
+                queue.remove();
+                sibling = statement();
+                if(sibling.getType()!= "ERROR") {
+                    temp.siblings = sibling;
+                    temp = temp.siblings;
+                }
+                else {
+                    return sibling;
+                }
+            }
+        }
+
+        if (ERROR.getType() == "ERROR") {
+            return ERROR;
+        } else {
+            return root;
+        }
+    }
+
+
+    /**
+     * statament -> if-stmt | repeat-stmt | assign-stmt |read-stmt |  write-stmt
+     *
+     * @return TreeNode
+     */
     public TreeNode statement() {
-        TreeNode nodeTemp = null;
+        TreeNode nodeTemp = null, errorCheckNode = null;
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
         switch (queue.peek().getType()) {
             case IF: {
-                nodeTemp = iFStmt();
-
+                errorCheckNode = iFStmt();
+                if (errorCheckNode.getType() == "ERROR") {
+                    ERROR = errorCheckNode;
+                } else {
+                    nodeTemp = errorCheckNode;
+                }
                 break;
             }
             case REPEAT: {
-                nodeTemp = repeatStmt();
+                errorCheckNode = repeatStmt();
+                if (errorCheckNode.getType() == "ERROR") {
+                    ERROR = errorCheckNode;
+                } else {
+                    nodeTemp = errorCheckNode;
+                }
+
                 break;
             }
             case READ: {
-                nodeTemp = readStmt();
+                errorCheckNode = readStmt();
+                if (errorCheckNode.getType() == "ERROR") {
+                    ERROR = errorCheckNode;
+                } else {
+                    nodeTemp = errorCheckNode;
+                }
                 break;
             }
             case WRITE: {
-                nodeTemp = writeStmt();
+                errorCheckNode = writeStmt();
+                if (errorCheckNode.getType() == "ERROR") {
+                    ERROR = errorCheckNode;
+                } else {
+                    nodeTemp = errorCheckNode;
+                }
                 break;
             }
             case IDENTIFIER: {
-                nodeTemp = assignStmt();
+                errorCheckNode = assignStmt();
+                if (errorCheckNode.getType() == "ERROR") {
+                    ERROR = errorCheckNode;
+                } else {
+                    nodeTemp = errorCheckNode;
+                }
                 break;
             }
-            default: //throw error or what to do ??
+            default:
+                ERROR = new TreeNode("Syntax Error", "ERROR");
+                break;
         }
-        return nodeTemp;
+        if (ERROR.getType() == "ERROR") {
+            return ERROR;
+        } else {
+            return nodeTemp;
+        }
     }
 
 
-
-    //if -stmt → if exp then stmt-sequence end
+    /**
+     * if -stmt → if exp then stmt-sequence end
+     *
+     * @return TreeNode
+     */
     public TreeNode iFStmt() {
+        TreeNode expNode = null, stmtSeqNode = null;
         //if
         TreeNode nodeTemp = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
-        //currentRoot=nodeTemp;
-        //System.out.println("if-stmt function "+ queue.peek().getValue());
-        if(!queue.isEmpty()) {
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+
+
+        if (!queue.isEmpty()) {
             queue.remove();
         }
         // enter with number
-        nodeTemp.setChild(exp());
+        expNode = exp();
 
-        if (match(queue.peek().getType(), Token.TokenType.THEN )) {
-            if(!queue.isEmpty()) {
-                queue.remove();
-            }
-            nodeTemp.setChild(stmtSequence());
+        if (expNode.getType() != "ERROR") {
+            nodeTemp.setChild(expNode);
+        } else {
+            ERROR = expNode;
         }
 
-        if (match(queue.peek().getType(), Token.TokenType.END)){
-            if(!queue.isEmpty()) {
+        if (match(queue.peek().getType(), Token.TokenType.THEN)) {
+            if (!queue.isEmpty()) {
                 queue.remove();
-                //flag1=true;
             }
+            stmtSeqNode = stmtSequence();
+
+            if (stmtSeqNode.getType() != "ERROR") {
+                nodeTemp.setChild(stmtSeqNode);
+            } else {
+                ERROR = stmtSeqNode;
+            }
+        } else {
+            ERROR = new TreeNode("Syntax Error", "ERROR");
         }
-        return nodeTemp;
+
+        if (!queue.isEmpty() && match(queue.peek().getType(), Token.TokenType.END)) {
+            if (!queue.isEmpty()) {
+                queue.remove();
+            }
+        } else {
+            ERROR = new TreeNode("Syntax Error", "ERROR");
+        }
+
+        if (ERROR.getType() == "ERROR") {
+            return ERROR;
+        } else {
+            return nodeTemp;
+        }
     }
 
-    /** errors to handle
-     * 1- if count < size
-     * 2- if any non-terminal function returns error
-     * 3- if two tokens does not match
-     * **/
-    //repeat->stmt-sequence until exp
+
+    /**
+     * repeat->stmt-sequence until exp
+     *
+     * @return TreeNode
+     */
     public TreeNode repeatStmt() {
         TreeNode repeatRoot = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
-        //currentRoot=repeatRoot;
-        if(!queue.isEmpty()) {
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+
+
+        if (!queue.isEmpty()) {
             queue.remove();
         }
 
@@ -154,225 +253,286 @@ public class Parser {
 
         bodyNode = stmtSequence();
 
-        if (bodyNode != null) {
+        if (bodyNode.getType() != "ERROR") {
             repeatRoot.setChild(bodyNode);
-
             if (match(queue.peek().getType(), Token.TokenType.UNTIL)) {
-                if(!queue.isEmpty()) {
+                if (!queue.isEmpty()) {
                     queue.remove();
                 }
                 // identifer expected
                 testNode = exp();
-                if (testNode != null) {
+                if (testNode.getType() != "ERROR") {
                     repeatRoot.setChild(testNode);
-                    //flag2 = true;
                 } else {
                     // handle error if testNode = null or error
+                    ERROR = testNode;
                 }
 
-            }
-            else{
+            } else {
                 // handle if next token is not until
+                ERROR = new TreeNode("Syntax Error", "ERROR");
             }
-        }
-        else {
+        } else {
             //handle error if bodyNode = null or error
+            ERROR = bodyNode;
         }
-        return repeatRoot;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return repeatRoot;
     }
 
-    // assignStmt -> Identifier := exp
+
+    /**
+     * assignStmt -> Identifier := exp
+     *
+     * @return
+     */
     public TreeNode assignStmt() {
 
         TreeNode assignRoot = new TreeNode("assign", "ASSIGN");
-
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
         TreeNode expNode = null;
-        //System.out.println(" peek 1" + queue.peek().getType());
 
-        if(match(queue.peek().getType(),Token.TokenType.IDENTIFIER)){
+        if (match(queue.peek().getType(), Token.TokenType.IDENTIFIER)) {
 
             assignRoot.setValue(queue.peek().getValue());
-            if(!queue.isEmpty()) {
+            if (!queue.isEmpty()) {
                 queue.remove();
             }
-            if(match(queue.peek().getType(),Token.TokenType.ASSIGN)){
-                if(!queue.isEmpty()) {
+            if (match(queue.peek().getType(), Token.TokenType.ASSIGN)) {
+                if (!queue.isEmpty()) {
                     queue.remove();
                 }
-                // identifer expected
-                //System.out.println("exp " + queue.peek().getValue());
-                expNode=exp();
 
-                if(expNode != null){
+                expNode = exp();
+
+                if (expNode.getType() != "ERROR") {
                     assignRoot.setChild(expNode);
-                }
-                else{
+                } else {
                     //handle if exp returns error
+                    ERROR = expNode;
                 }
 
-            }
-            else{
-                // next token of identifier is not as assign
+            } else {
+                // next token of identifier is not an assign
+                ERROR = new TreeNode("Syntax Error", "ERROR");
             }
 
-        }
-        else{
+        } else {
             //handle if next token is not an identifier
+            ERROR = new TreeNode("Syntax Error", "ERROR");
         }
-        return assignRoot;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return assignRoot;
     }
 
-    /*
-     *Done Testing
+
+    /**
+     * read - > read identifer
+     *
+     * @return TreeNode
      */
-    // read - > read identifer
     public TreeNode readStmt() {
         TreeNode readRoot = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
-        if(!queue.isEmpty()) {
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+        if (!queue.isEmpty()) {
             queue.remove();
         }
 
-        if(!match(queue.peek().getType(), Token.TokenType.IDENTIFIER)){
-            //handle error next token is not an identifier
-        }
-        else {
+        if (!match(queue.peek().getType(), Token.TokenType.IDENTIFIER)) {
+            ERROR = new TreeNode("Syntax Error", "ERROR");
+        } else {
             readRoot.setChild(new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType())));
-            if(!queue.isEmpty()) {
+            if (!queue.isEmpty()) {
                 queue.remove();
             }
         }
-        return readRoot;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return readRoot;
     }
 
 
-    // write -> write exp
-
+    /**
+     * write -> write exp
+     *
+     * @return TreeNode
+     */
     public TreeNode writeStmt() {
-        TreeNode writeRoot =  new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
+        TreeNode writeRoot = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
         TreeNode expNode = null;
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
 
-        if(!queue.isEmpty()) {
+        if (!queue.isEmpty()) {
             queue.remove();
         }
         // identifier expected
         expNode = exp();
-
-        if(expNode != null){
+        if (expNode.getType() != "ERROR") {
             writeRoot.setChild(expNode);
+        } else {
+            ERROR = expNode;
         }
-        else{
-            //handle return error from exp
-        }
-        return writeRoot;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return writeRoot;
     }
 
 
-    // exp -> simple-exp comparison-op simple-exp | simple-exp
+    //
 
+    /**
+     * exp -> simple-exp comparison-op simple-exp | simple-exp
+     *
+     * @return TreeNode
+     */
     public TreeNode exp() {
         // identifer
-        TreeNode nodeComp = new TreeNode("op" , "comparsion");
+        TreeNode nodeComp = new TreeNode("op", "comparsion");
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+
         // da5l bl identifer
         TreeNode nodeTemp = simpleexp();
-        nodeComp.setChild(nodeTemp);
+
+        if (nodeTemp.getType() != "ERROR")
+            nodeComp.setChild(nodeTemp);
+        else ERROR = nodeTemp;
 
         // comparison operator
-        if ( !queue.isEmpty() && (queue.peek().getType() == Token.TokenType.EQUAL || queue.peek().getType()== Token.TokenType.LESSTHAN)) {
+        if (!queue.isEmpty() && (queue.peek().getType() == Token.TokenType.EQUAL || queue.peek().getType() == Token.TokenType.LESSTHAN)) {
             nodeComp.setValue(queue.peek().getValue());
             nodeComp.setType(String.valueOf(queue.peek().getType()));
-            if(!queue.isEmpty()) {
+
+            nodeComp.setType(String.valueOf(queue.peek().getType()));
+            if (!queue.isEmpty()) {
                 queue.remove();
             }
-            nodeComp.setChild(simpleexp());
-            return nodeComp;
+            TreeNode nodeSimple = simpleexp();
+            if (nodeSimple.getType() != "ERROR")
+                nodeComp.setChild(nodeSimple);
+            else ERROR = nodeSimple;
         }
-        return nodeTemp;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return nodeComp;
     }
 
 
-    // simple-exp -> simple-exp addop term | term
-
-    // simple-exp -> term {addop term}
-
+    /**
+     * simple-exp -> term {addop term}
+     *
+     * @return TreeNode
+     */
     public TreeNode simpleexp() {
         // identifier exits
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+
         TreeNode nodeTemp = term();
 
-        while (( !queue.isEmpty()) && (queue.peek().getType() == Token.TokenType.PLUS || queue.peek().getType() == Token.TokenType.MINUS)) {
+
+        while ((!queue.isEmpty()) && (queue.peek().getType() == Token.TokenType.PLUS || queue.peek().getType() == Token.TokenType.MINUS)) {
             TreeNode addopNode = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
 
-            addopNode.setChild(nodeTemp);
+            if (nodeTemp.getType() != "ERROR")
+                addopNode.setChild(nodeTemp);
+            else ERROR = nodeTemp;
 
-            if(!queue.isEmpty()) {
+            if (!queue.isEmpty()) {
                 queue.remove();
             }
             // Set the right child
             // identifer
-            addopNode.setChild(term());
+
+            TreeNode nodeTerm = term();
+            if (nodeTemp.getType() != "ERROR")
+                addopNode.setChild(nodeTerm);
+
+            else ERROR = nodeTerm;
+
             // Update nodeTemp to the new addopNode
             nodeTemp = addopNode;
         }
-        return nodeTemp;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return nodeTemp;
     }
 
 
-    // term -> term mulop factor | factor
-    // term -> factor {mulop factor}
-
+    /**
+     * term -> factor {mulop factor}
+     *
+     * @return TreeNode
+     */
     public TreeNode term() {
-
         TreeNode nodeTemp = factor();
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
 
         while (((!queue.isEmpty()) && (queue.peek().getType() == Token.TokenType.MULT || queue.peek().getType() == Token.TokenType.DIV))) {
-
             // Create a new node for the mulop
             TreeNode mulopNode = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
-            mulopNode.setChild(nodeTemp); // Set the left child to the current factor
-
-            if(!queue.isEmpty()) {
+            if (nodeTemp.getType() != "ERROR")
+                mulopNode.setChild(nodeTemp); // Set the left child to the current factor
+            else ERROR = nodeTemp;
+            if (!queue.isEmpty()) {
                 queue.remove();
             }
-            mulopNode.setChild(factor());
+            TreeNode nodeFactor = factor();
+            if (nodeTemp.getType() != "ERROR")
+                mulopNode.setChild(nodeFactor);
+            else ERROR = nodeFactor;
             nodeTemp = mulopNode;
         }
-        return nodeTemp;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return nodeTemp;
     }
 
-    // factor -> (exp) | number | identifier
+
+    /**
+     * factor -> (exp) | number | identifier
+     *
+     * @return TreeNode
+     */
     public TreeNode factor() {
         TreeNode nodeTemp = null;
+        TreeNode ERROR = new TreeNode("FALSE", "FALSE");
+
         switch (queue.peek().getType()) {
             case OPENBRACKET: {
-                if (count < size - 1) {
-                    if(!queue.isEmpty()) {
+                if (!queue.isEmpty()) {
+                    queue.remove();
+                }
+                TreeNode nodeEXP = exp();
+                if (nodeEXP.getType() != "ERROR")
+                    nodeTemp = nodeEXP;
+                else
+                    ERROR = nodeEXP;
+
+                if (match(queue.peek().getType(), Token.TokenType.CLOSEDBRACKET)) {
+                    if (!queue.isEmpty()) {
                         queue.remove();
                     }
-                    nodeTemp = exp();
-
-                    if (match(queue.peek().getType(), Token.TokenType.CLOSEDBRACKET)) {
-                        if(!queue.isEmpty()) {
-                            queue.remove();
-                        }
-                    }
                 } else {
-
-
+                    ERROR = new TreeNode("Syntax Error", "ERROR");
                 }
                 break;
             }
             case NUMBER:
             case IDENTIFIER: {
                 nodeTemp = new TreeNode(queue.peek().getValue(), String.valueOf(queue.peek().getType()));
-                if(!queue.isEmpty()) {
+                if (!queue.isEmpty()) {
                     queue.remove();
                 }
                 break;
             }
             default: {
-                // Error: Invalid factor
+                ERROR = new TreeNode("Syntax Error", "ERROR");
                 break;
             }
         }
-        return nodeTemp;
+        if (ERROR.getType() == "ERROR")
+            return ERROR;
+        else return nodeTemp;
     }
 }

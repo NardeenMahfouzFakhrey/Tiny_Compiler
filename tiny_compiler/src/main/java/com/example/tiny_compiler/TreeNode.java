@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class TreeNode {
     public String value;
     public String type;
-    public ArrayList<TreeNode> childs= new ArrayList<>();
+    public ArrayList<TreeNode> children= new ArrayList<>();
     TreeNode siblings;
 
 
@@ -30,15 +30,15 @@ public class TreeNode {
     }
 
     public ArrayList<TreeNode> getChilds() {
-        return childs;
+        return children;
     }
 
     public void setChilds(ArrayList<TreeNode> childs) {
-        this.childs = childs;
+        this.children = childs;
     }
 
     public void setChild(TreeNode child) {
-        this.childs.add(child);
+        this.children.add(child);
     }
 
 
