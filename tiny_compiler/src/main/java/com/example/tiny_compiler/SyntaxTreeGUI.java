@@ -68,14 +68,19 @@ public class SyntaxTreeGUI extends Pane {
             }
 
             //ArrayList<TreeNode> children = node.getChilds();
-
             for (int i = 0; i < node.children.size(); i++) {
                 double linkXStart = xPos + 0.5 * NODE_WIDTH;
                 double linkYStart = yPos + NODE_HEIGHT;
                 if (node.type != "READ") {
                     if (node.type != "PROGRAM") {
-                        Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
-                        this.getChildren().add(line);
+                        if (node.type == "REPEAT") {
+                            childX = ensureNotOverlapped(childX, childY);
+                            Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
+                            this.getChildren().add(line);
+                        }else{
+                            Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
+                            this.getChildren().add(line);
+                        }
                     }
 
                     drawTree(node.getChilds().get(i), childX, childY);
@@ -95,6 +100,7 @@ public class SyntaxTreeGUI extends Pane {
                 Line line = new Line(xPos + NODE_WIDTH, siblingLinkY, siblingX, siblingLinkY);
                 this.getChildren().add(line);
             }
+
 
             // adjust pane size
             double boundX = siblingX + getLevelWidth(siblingTree) * (NODE_WIDTH + NODE_GAP);

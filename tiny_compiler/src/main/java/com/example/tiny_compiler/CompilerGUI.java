@@ -82,7 +82,7 @@ public class CompilerGUI extends Application {
             if(linesTextArea.getText() == ""){
                 showAlert("Error in Tiny Compiler","TextBox is empty");
             }else{
-                codeLines = linesTextArea.getText() + " ";
+                codeLines = linesTextArea.getText().replaceAll("[\\s\\r\\n]+$", "") + " ";
                 compiler.setInputData(codeLines);
                 try {
                     compiler.compile(compiler.getInputData());
