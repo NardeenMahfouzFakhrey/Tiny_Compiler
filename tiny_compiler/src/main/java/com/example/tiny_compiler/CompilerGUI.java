@@ -70,7 +70,7 @@ public class CompilerGUI extends Application {
                     compiler.compile(compiler.getInputData());
                     showParsing(compiler.getTokenStream());
                 } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+                    showAlert("Error in Tiny Compiler", "Syntax Error");
                 }
             }
         };
@@ -88,7 +88,7 @@ public class CompilerGUI extends Application {
                     compiler.compile(compiler.getInputData());
                     showParsing(compiler.getTokenStream());
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    showAlert("Error in Tiny Compiler", "Syntax Error");
                 }
             }
         });
