@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -15,7 +16,9 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -45,8 +48,28 @@ public class CompilerGUI extends Application {
         Button button = new Button("Browse");
         button.setStyle("-fx-font-size: 14;");  // Adjust font size
 
+        RadioButton codeRadioButton = new RadioButton("Input is Code");
+        codeRadioButton.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        codeRadioButton.setTextFill(Color.BLACK);
+
+        RadioButton tokenStreamRadioButton = new RadioButton("Input is Token Stream");
+        tokenStreamRadioButton.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        tokenStreamRadioButton.setTextFill(Color.BLACK);
+
+        ToggleGroup inputToggleGroup = new ToggleGroup();
+        codeRadioButton.setToggleGroup(inputToggleGroup);
+        tokenStreamRadioButton.setToggleGroup(inputToggleGroup);
+
+
+
 
         EventHandler<ActionEvent> event1 = e -> {
+            RadioButton selectedRadioButton = (RadioButton) inputToggleGroup.getSelectedToggle();
+
+            if (selectedRadioButton == null) {
+                showAlert("Error in Tiny Compiler", "Please select one of the input options.");
+                return;
+            }
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose a file");
 
@@ -61,39 +84,69 @@ public class CompilerGUI extends Application {
                     showAlert("Invalid File", "Please choose a file with a .txt extension.");
                     return;
                 }
-
-                Compiler compiler = new Compiler();
-                compiler.setInputData(null);
-
-                compiler.readFile(file.getAbsolutePath());
-                try {
-                    compiler.compile(compiler.getInputData());
-                    showParsing(compiler.getTokenStream());
-                } catch (Exception ex) {
-                    showAlert("Error in Tiny Compiler", "Syntax Error");
+                linesTextArea.clear();
+                if (selectedRadioButton == codeRadioButton){
+                    Compiler compiler = new Compiler();
+                    compiler.setInputData(null);
+                    compiler.readFile(file.getAbsolutePath());
+                    try {
+                        compiler.compile(compiler.getInputData());
+                        showParsing(compiler.getTokenStream());
+                    } catch (Exception ex) {
+                        showAlert("Error in Tiny Compiler", "Syntax Error");
+                    }
                 }
+                else {
+                    String tokensString = readFileAndReturnString(file.getAbsolutePath());
+                    ArrayList<Token> tokenStream = parseTokenString(tokensString);
+                    try {
+                        showParsing(tokenStream);
+                    } catch (Exception E) {
+                        showAlert("Error in Tiny Compiler", "Syntax Error");
+                    }
+                }
+
             }
         };
         button.setOnAction(event1);
 
         scanButton.setOnAction(action -> {
-            Compiler compiler = new Compiler();
+            RadioButton selectedRadioButton = (RadioButton) inputToggleGroup.getSelectedToggle();
+
+            if (selectedRadioButton == null) {
+                showAlert("Error in Tiny Compiler", "Please select one of the input options.");
+                return;
+            }
             codeLines = "";
             if(linesTextArea.getText() == ""){
                 showAlert("Error in Tiny Compiler","TextBox is empty");
             }else{
                 codeLines = linesTextArea.getText().replaceAll("[\\s\\r\\n]+$", "") + " ";
-                compiler.setInputData(codeLines);
-                try {
-                    compiler.compile(compiler.getInputData());
-                    showParsing(compiler.getTokenStream());
-                } catch (Exception e) {
-                    showAlert("Error in Tiny Compiler", "Syntax Error");
-                }
+               if (selectedRadioButton == codeRadioButton){
+                   Compiler compiler = new Compiler();
+                   compiler.setInputData(codeLines);
+                   try {
+                       compiler.compile(compiler.getInputData());
+                       showParsing(compiler.getTokenStream());
+                   } catch (Exception e) {
+                       showAlert("Error in Tiny Compiler", "Syntax Error");
+                   }
+               }else {
+                     ArrayList<Token> tokenStream = parseTokenString(codeLines);
+                   try {
+                       showParsing(tokenStream);
+                   } catch (Exception e) {
+                       showAlert("Error in Tiny Compiler", "Syntax Error");
+                   }
+               }
             }
         });
         ///
-        VBox vbox = new VBox(20, label, button, linesTextArea, scanButton);
+        HBox radioButtonsHBox = new HBox(10, codeRadioButton, tokenStreamRadioButton);
+        radioButtonsHBox.setAlignment(Pos.CENTER_LEFT);
+        radioButtonsHBox.setPadding(new Insets(15));
+        radioButtonsHBox.setSpacing(40);
+        VBox vbox = new VBox(20, radioButtonsHBox, label, button, linesTextArea, scanButton);
         vbox.setAlignment(Pos.CENTER);
         vbox.setPadding(new Insets(20));
 
@@ -122,6 +175,36 @@ public class CompilerGUI extends Application {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+    public static ArrayList<Token> parseTokenString(String input) {
+        ArrayList<Token> tokens = new ArrayList<>();
+        String[] lines = input.split("\n");
+
+        for (String line : lines) {
+            String[] parts = line.trim().split(",\\s*");
+            if (parts.length == 2) {
+                String value = parts[0].trim();
+                String typeString = parts[1].trim();
+                tokens.add(new Token(Token.TokenType.valueOf(typeString.toUpperCase()),value));
+            }
+        }
+
+        return tokens;
+    }
+    public String readFileAndReturnString(String filePath) {
+        StringBuilder builder = new StringBuilder();
+
+        try (BufferedReader buffer = new BufferedReader(new FileReader(filePath))) {
+            String str;
+
+            while ((str = buffer.readLine()) != null) {
+                builder.append(str).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return String.valueOf(builder);
     }
 
     public void showParsing(ArrayList<Token> treeNode) {

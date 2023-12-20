@@ -73,14 +73,9 @@ public class SyntaxTreeGUI extends Pane {
                 double linkYStart = yPos + NODE_HEIGHT;
                 if (node.type != "READ") {
                     if (node.type != "PROGRAM") {
-                        if (node.type == "REPEAT") {
                             childX = ensureNotOverlapped(childX, childY);
                             Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
                             this.getChildren().add(line);
-                        }else{
-                            Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
-                            this.getChildren().add(line);
-                        }
                     }
 
                     drawTree(node.getChilds().get(i), childX, childY);

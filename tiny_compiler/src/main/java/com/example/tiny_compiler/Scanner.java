@@ -7,7 +7,7 @@ public class Scanner {
     private static int i = 0;
     private int line_counter = 1;
 
-    String[] Reserved = {"if", "then", "end", "repeat", "until", "read", "write"};
+    String[] Reserved = {"if", "then", "end", "repeat", "until", "read", "write","else"};
 
     public static void setI(int i) {
         Scanner.i = i;

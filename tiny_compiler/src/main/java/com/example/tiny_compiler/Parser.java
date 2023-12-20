@@ -213,6 +213,20 @@ public class Parser {
             } else {
                 ERROR = stmtSeqNode;
             }
+            System.out.println("here");
+            if(!queue.isEmpty() && match(queue.peek().getType(), Token.TokenType.ELSE)) {
+
+                if (!queue.isEmpty()) {
+                    queue.remove();
+                }
+                stmtSeqNode = stmtSequence();
+
+                if (stmtSeqNode.getType() != "ERROR") {
+                    nodeTemp.setChild(stmtSeqNode);
+                } else {
+                    ERROR = stmtSeqNode;
+                }
+            }
         } else {
             ERROR = new TreeNode("Syntax Error", "ERROR");
         }

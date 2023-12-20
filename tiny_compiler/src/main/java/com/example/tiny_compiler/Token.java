@@ -24,7 +24,8 @@ public class Token {
         NUMBER,
         ERROR,
         Comment,
-        EOS
+        EOS,
+        ELSE
     };
     private TokenType type;
     private String value;
