@@ -77,7 +77,6 @@ public class SyntaxTreeGUI extends Pane {
                             Line line = new Line(linkXStart, linkYStart, childX + 0.5 * NODE_WIDTH, childY);
                             this.getChildren().add(line);
                     }
-
                     drawTree(node.getChilds().get(i), childX, childY);
                 }
                 childX += getLevelWidth(node.children.get(i)) * (NODE_WIDTH + NODE_GAP);
@@ -96,12 +95,10 @@ public class SyntaxTreeGUI extends Pane {
                 this.getChildren().add(line);
             }
 
-
             // adjust pane size
             double boundX = siblingX + getLevelWidth(siblingTree) * (NODE_WIDTH + NODE_GAP);
             adjustBounds(boundX, childY);
         }
-
     }
     private void addEllipse(double xPos, double yPos, Color strokePaint) {
         double centerX = xPos + 0.5*NODE_WIDTH;
