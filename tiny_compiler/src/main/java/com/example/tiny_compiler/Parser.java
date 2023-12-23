@@ -213,7 +213,6 @@ public class Parser {
             } else {
                 ERROR = stmtSeqNode;
             }
-            System.out.println("here");
             if(!queue.isEmpty() && match(queue.peek().getType(), Token.TokenType.ELSE)) {
 
                 if (!queue.isEmpty()) {
